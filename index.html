@@ -2,286 +2,330 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SSG Tracker — Operation Excellence</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Syne+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SSG Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-/* ═══════════════════════════════════════
-   THEMES
-═══════════════════════════════════════ */
-:root{--bg:#080a0d;--surface:#0f1318;--surface2:#161c23;--border:#1d2530;--accent:#c8a84b;--accent2:#e8c96b;--red:#e05252;--green:#4caf7d;--blue:#4a90d9;--text:#dde3ec;--muted:#4a5568;--sidebar-w:220px}
-[data-theme="military"]{--bg:#080a0d;--surface:#0f1318;--surface2:#161c23;--border:#1d2530;--accent:#c8a84b;--accent2:#e8c96b}
+:root{
+  --bg:#080a0d;--surface:#0f1318;--surface2:#161c23;--border:#1d2530;
+  --accent:#c8a84b;--accent2:#e8c96b;--red:#e05252;--green:#4caf7d;--blue:#4a90d9;
+  --text:#dde3ec;--muted:#4a5568;--sw:220px;
+}
 [data-theme="night"]{--bg:#06060f;--surface:#0d0d1a;--surface2:#121220;--border:#1a1a30;--accent:#8b7cf6;--accent2:#a89df8}
 [data-theme="forest"]{--bg:#060c08;--surface:#0c1410;--surface2:#121d14;--border:#1a2b1e;--accent:#52b788;--accent2:#74c69d}
 [data-theme="blood"]{--bg:#0c0606;--surface:#150c0c;--surface2:#1c1010;--border:#2a1414;--accent:#e05252;--accent2:#f07070}
-[data-theme="light"]{--bg:#eef0f4;--surface:#ffffff;--surface2:#e4e8ef;--border:#c8d0dc;--accent:#b8942e;--accent2:#d4aa44;--text:#1a2030;--muted:#6b7a90}
+[data-theme="light"]{--bg:#eef0f4;--surface:#fff;--surface2:#e4e8ef;--border:#c8d0dc;--accent:#b8942e;--accent2:#d4aa44;--text:#1a2030;--muted:#6b7a90}
 
 *{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(200,168,75,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(200,168,75,.018) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
 
-/* ═══ LOADING ═══ */
-.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500;flex-direction:column;gap:20px}
-.loading-logo{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;letter-spacing:6px;color:var(--accent);text-transform:uppercase}
-.loading-sub{font-family:'Syne Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
-.loading-dots{display:flex;gap:6px;margin-top:8px}
+/* ── LOADING ── */
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500;flex-direction:column;gap:16px}
+.loading-logo{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,40px);font-weight:800;letter-spacing:6px;color:var(--accent);text-transform:uppercase}
+.loading-sub{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.5vw,11px);color:var(--muted);letter-spacing:3px;text-transform:uppercase}
+.loading-dots{display:flex;gap:6px;margin-top:6px}
 .loading-dots span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:bounce 1.2s infinite}
 .loading-dots span:nth-child(2){animation-delay:.2s}.loading-dots span:nth-child(3){animation-delay:.4s}
 @keyframes bounce{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1);opacity:1}}
 
-/* ═══ AUTH ═══ */
+/* ── AUTH ── */
 #authScreen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1}
-.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:44px 40px;width:100%;max-width:420px}
-.auth-logo{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;letter-spacing:4px;color:var(--accent);text-transform:uppercase}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:clamp(24px,5vw,44px) clamp(20px,5vw,40px);width:100%;max-width:420px}
+.auth-logo{font-family:'Syne',sans-serif;font-size:clamp(24px,5vw,32px);font-weight:800;letter-spacing:4px;color:var(--accent);text-transform:uppercase}
 .auth-logo span{color:var(--text)}
-.auth-tagline{font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:3px;margin-bottom:32px}
-.auth-tabs{display:flex;margin-bottom:26px;background:var(--surface2);border-radius:8px;padding:3px;gap:3px}
-.auth-tab{flex:1;padding:9px;text-align:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:var(--muted);transition:all .2s;border-radius:6px}
+.auth-tagline{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.5vw,11px);color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin:3px 0 28px}
+.auth-tabs{display:flex;margin-bottom:22px;background:var(--surface2);border-radius:8px;padding:3px;gap:3px}
+.auth-tab{flex:1;padding:9px;text-align:center;font-family:'Syne',sans-serif;font-size:clamp(10px,1.5vw,12px);font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:var(--muted);transition:all .2s;border-radius:6px}
 .auth-tab.active{background:var(--accent);color:#000}
-.auth-field{margin-bottom:14px}
-.auth-field label{display:block;font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
-.auth-field input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border .2s}
+.auth-field{margin-bottom:13px}
+.auth-field label{display:block;font-family:'Syne Mono',monospace;font-size:clamp(9px,1.4vw,11px);color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.auth-field input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 13px;border-radius:8px;font-family:'Inter',sans-serif;font-size:clamp(13px,2vw,15px);outline:none;transition:border .2s}
 .auth-field input:focus{border-color:var(--accent)}
-.auth-btn{width:100%;padding:14px;background:var(--accent);border:none;color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all .2s;margin-top:8px}
-.auth-btn:hover{background:var(--accent2);transform:translateY(-1px)}
-.auth-msg{font-size:12px;margin-top:12px;text-align:center;min-height:18px;font-family:'Syne Mono',monospace}
+.auth-btn{width:100%;padding:13px;background:var(--accent);border:none;color:#000;font-family:'Syne',sans-serif;font-size:clamp(13px,2vw,16px);font-weight:800;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all .2s;margin-top:8px}
+.auth-btn:hover{background:var(--accent2)}
+.auth-msg{font-size:clamp(10px,1.5vw,12px);margin-top:10px;text-align:center;min-height:16px;font-family:'Syne Mono',monospace}
 .auth-msg.error{color:var(--red)}.auth-msg.success{color:var(--green)}.auth-msg.info{color:var(--muted)}
 
-/* ═══ VERIFY ═══ */
+/* ── VERIFY ── */
 #verifyScreen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1}
-.verify-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:44px 40px;width:100%;max-width:420px;text-align:center}
-.verify-icon{font-size:48px;margin-bottom:16px}
-.verify-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
-.verify-msg{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px}
+.verify-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:40px 32px;width:100%;max-width:420px;text-align:center}
+.verify-icon{font-size:48px;margin-bottom:14px}
+.verify-title{font-family:'Syne',sans-serif;font-size:clamp(20px,3vw,26px);font-weight:800;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
+.verify-msg{font-size:clamp(12px,1.8vw,14px);color:var(--muted);line-height:1.7;margin-bottom:24px}
 .verify-email{color:var(--text);font-weight:600}
-.verify-resend{background:transparent;border:1px solid var(--border);color:var(--muted);padding:10px 20px;border-radius:7px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.verify-resend{background:transparent;border:1px solid var(--border);color:var(--muted);padding:9px 18px;border-radius:7px;font-family:'Syne',sans-serif;font-size:clamp(10px,1.5vw,12px);font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .verify-resend:hover{border-color:var(--accent);color:var(--accent)}
 
-/* ═══ ONBOARDING ═══ */
+/* ── ONBOARDING ── */
 #onboardScreen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1}
-.onboard-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:44px 40px;width:100%;max-width:500px}
+.onboard-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:clamp(24px,5vw,44px) clamp(20px,5vw,40px);width:100%;max-width:500px}
 .onboard-step{display:none}.onboard-step.active{display:block}
-.onboard-progress{display:flex;gap:5px;margin-bottom:30px}
+.onboard-progress{display:flex;gap:5px;margin-bottom:26px}
 .onboard-dot{flex:1;height:3px;background:var(--border);border-radius:2px;transition:background .3s}
 .onboard-dot.done{background:var(--accent)}
-.onboard-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
-.onboard-sub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6}
-.onboard-options{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
-.onboard-option{display:flex;align-items:center;gap:13px;padding:13px 15px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s}
+.onboard-title{font-family:'Syne',sans-serif;font-size:clamp(18px,3vw,24px);font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+.onboard-sub{font-size:clamp(12px,1.8vw,13px);color:var(--muted);margin-bottom:20px;line-height:1.6}
+.onboard-options{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.onboard-option{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s}
 .onboard-option:hover,.onboard-option.selected{border-color:var(--accent);background:rgba(200,168,75,.06)}
 .onboard-option.selected .ob-check{background:var(--accent);border-color:var(--accent);color:#000}
 .ob-check{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s}
-.ob-label{font-size:14px;font-weight:500}.ob-sub{font-size:11px;color:var(--muted)}
-.onboard-btn{width:100%;padding:14px;background:var(--accent);border:none;color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all .2s}
+.ob-label{font-size:clamp(12px,1.8vw,14px);font-weight:500}.ob-sub{font-size:clamp(9px,1.4vw,11px);color:var(--muted)}
+.onboard-btn{width:100%;padding:13px;background:var(--accent);border:none;color:#000;font-family:'Syne',sans-serif;font-size:clamp(13px,2vw,15px);font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all .2s}
 .onboard-btn:hover{background:var(--accent2)}
 .onboard-skip{text-align:center;margin-top:10px}
-.onboard-skip a{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline}
+.onboard-skip a{font-size:clamp(10px,1.5vw,12px);color:var(--muted);cursor:pointer;text-decoration:underline}
 
-/* ═══ APP LAYOUT ═══ */
+/* ── APP LAYOUT ── */
 #appScreen{display:none;position:relative;z-index:1;min-height:100vh}
 .app-layout{display:flex;min-height:100vh}
 
-/* ═══ SIDEBAR ═══ */
-.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;z-index:100;display:flex;flex-direction:column;transition:transform .3s}
-.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
-.sidebar-logo-text{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:3px;color:var(--accent);text-transform:uppercase}
-.sidebar-logo-sub{font-family:'Syne Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
-.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto}
-.nav-section-label{font-family:'Syne Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:12px 20px 6px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;font-size:13px;font-weight:500;color:var(--muted)}
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sw);background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;z-index:100;display:flex;flex-direction:column;transition:transform .3s}
+.sidebar-logo{padding:20px 18px 14px;border-bottom:1px solid var(--border)}
+.sidebar-logo-text{font-family:'Syne',sans-serif;font-size:clamp(16px,2vw,20px);font-weight:800;letter-spacing:3px;color:var(--accent);text-transform:uppercase}
+.sidebar-logo-sub{font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,9px);color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sidebar-nav{flex:1;padding:10px 0;overflow-y:auto}
+.nav-label{font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,9px);color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:10px 18px 5px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;font-size:clamp(11px,1.6vw,13px);font-weight:500;color:var(--muted)}
 .nav-item:hover{background:var(--surface2);color:var(--text)}
 .nav-item.active{background:rgba(200,168,75,.08);border-left-color:var(--accent);color:var(--accent)}
-.nav-item-icon{font-size:15px;flex-shrink:0}
-.sidebar-bottom{padding:16px 20px;border-top:1px solid var(--border)}
-.sidebar-user{font-size:12px;color:var(--muted);margin-bottom:10px;font-family:'Syne Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sidebar-signout{width:100%;padding:8px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.nav-item-icon{font-size:clamp(13px,1.8vw,15px);flex-shrink:0;width:20px;text-align:center}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid var(--border)}
+.sidebar-user{font-size:clamp(9px,1.3vw,11px);color:var(--muted);margin-bottom:9px;font-family:'Syne Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-signout{width:100%;padding:8px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;font-family:'Syne',sans-serif;font-size:clamp(10px,1.4vw,11px);font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .sidebar-signout:hover{border-color:var(--red);color:var(--red)}
 
-/* ═══ MAIN CONTENT ═══ */
-.main-content{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
-.page{display:none;padding:0 0 60px}
+/* ── MAIN ── */
+.main-content{margin-left:var(--sw);flex:1;min-height:100vh;min-width:0}
+.page{display:none;padding-bottom:60px}
 .page.active{display:block}
-.page-header{padding:24px 28px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;background:rgba(8,10,13,.97);backdrop-filter:blur(12px);z-index:50}
+.page-header{padding:clamp(14px,2.5vw,22px) clamp(16px,3vw,28px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;position:sticky;top:0;background:rgba(8,10,13,.97);backdrop-filter:blur(12px);z-index:50}
 [data-theme="light"] .page-header{background:rgba(238,240,244,.97)}
-.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:3px;color:var(--text);text-transform:uppercase}
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(16px,2.5vw,22px);font-weight:800;letter-spacing:3px;color:var(--text);text-transform:uppercase}
 .page-title span{color:var(--accent)}
-.page-body{padding:20px 28px}
+.page-body{padding:clamp(14px,2.5vw,22px) clamp(16px,3vw,28px)}
 
 /* HEADER WIDGETS */
 .header-widgets{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.pts-pill{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);padding:7px 14px;border-radius:20px}
-.pts-val{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--accent)}
-.pts-lbl{font-family:'Syne Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
-.rank-chip{padding:7px 12px;border-radius:20px;border:1px solid;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .3s}
-.icon-btn{background:transparent;border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
-.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.pts-pill{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);padding:6px 12px;border-radius:20px}
+.pts-val{font-family:'Syne',sans-serif;font-size:clamp(14px,2vw,18px);font-weight:800;color:var(--accent)}
+.pts-lbl{font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,10px);color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.rank-chip{padding:6px 11px;border-radius:20px;border:1px solid;font-family:'Syne',sans-serif;font-size:clamp(10px,1.4vw,12px);font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .3s;white-space:nowrap}
+.mob-menu-btn{display:none;background:transparent;border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
 
 /* DATE NAV */
-.date-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border)}
-.date-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 16px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:6px;transition:all .2s}
+.date-nav{display:flex;align-items:center;justify-content:space-between;padding:clamp(10px,2vw,14px) clamp(16px,3vw,28px);border-bottom:1px solid var(--border)}
+.date-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px clamp(10px,2vw,16px);cursor:pointer;font-family:'Syne',sans-serif;font-size:clamp(10px,1.4vw,12px);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:6px;transition:all .2s;white-space:nowrap}
 .date-btn:hover{border-color:var(--accent);color:var(--accent)}
-.date-center{text-align:center}
-.date-main{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
-.date-sub{font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px}
+.date-center{text-align:center;flex:1;padding:0 10px}
+.date-main{font-family:'Syne',sans-serif;font-size:clamp(14px,2.5vw,19px);font-weight:800;letter-spacing:2px;text-transform:uppercase}
+.date-sub{font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,10px);color:var(--muted);letter-spacing:1px}
 
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 28px;border-bottom:1px solid var(--border)}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
-.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--accent);line-height:1}
-.stat-label{font-family:'Syne Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,1.5vw,10px);padding:clamp(10px,2vw,16px) clamp(16px,3vw,28px);border-bottom:1px solid var(--border)}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:clamp(10px,2vw,14px) clamp(10px,2vw,16px)}
+.stat-val{font-family:'Syne',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:800;color:var(--accent);line-height:1}
+.stat-label{font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,10px);color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
 
 /* PROGRESS */
-.progress-bar-wrap{padding:14px 28px;border-bottom:1px solid var(--border)}
-.progress-hdr{display:flex;justify-content:space-between;margin-bottom:8px;font-family:'Syne Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.progress-bar-wrap{padding:clamp(10px,2vw,14px) clamp(16px,3vw,28px);border-bottom:1px solid var(--border)}
+.progress-hdr{display:flex;justify-content:space-between;margin-bottom:7px;font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,10px);text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
 .progress-pct{color:var(--accent);font-weight:700}
 .progress-track{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .5s ease}
-.quote-bar{padding:10px 28px;font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);font-style:italic;border-bottom:1px solid var(--border);letter-spacing:.3px}
+.quote-bar{padding:clamp(8px,1.5vw,10px) clamp(16px,3vw,28px);font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,11px);color:var(--muted);font-style:italic;border-bottom:1px solid var(--border)}
 
 /* SECTIONS */
-.sections{padding:16px 28px;display:flex;flex-direction:column;gap:12px}
-.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.section-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:background .2s}
+.sections{padding:clamp(12px,2vw,16px) clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:10px}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:visible}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:clamp(10px,1.8vw,13px) clamp(12px,2vw,16px);cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:background .2s;border-radius:10px 10px 0 0}
+.section.closed .section-header{border-radius:10px;border-bottom:none}
 .section-header:hover{background:var(--surface2)}
-.section-title{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
-.section-meta{display:flex;align-items:center;gap:8px}
-.section-pts{font-family:'Syne Mono',monospace;font-size:10px;color:var(--accent);font-weight:600;letter-spacing:1px}
+.section-title{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:clamp(10px,1.5vw,12px);font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.section-meta{display:flex;align-items:center;gap:7px}
+.section-pts{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);color:var(--accent);font-weight:600;letter-spacing:1px}
 .section-toggle{font-size:10px;color:var(--muted);transition:transform .3s}
 .section.open .section-toggle{transform:rotate(180deg)}
 .section-body{display:none}
 .section.open .section-body{display:block}
 
 /* TASKS */
-.task{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(29,37,48,.5);transition:background .15s;position:relative}
+.task{display:flex;align-items:center;gap:9px;padding:clamp(8px,1.5vw,10px) clamp(12px,2vw,15px);border-bottom:1px solid rgba(29,37,48,.5);transition:background .15s;position:relative}
 .task:last-child{border-bottom:none}
 .task.done{opacity:.45}
 .task.done .task-name{text-decoration:line-through}
-.task-click{cursor:pointer;flex:1;display:flex;align-items:center;gap:10px}
+.task-click{cursor:pointer;flex:1;display:flex;align-items:center;gap:9px;min-width:0}
 .checkbox{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:10px}
 .task.done .checkbox{background:var(--green);border-color:var(--green)}
-.task-info{flex:1}
-.task-name{font-size:13px;font-weight:500;margin-bottom:2px}
-.task-time{font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted)}
-.task-pts{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0}
-
-/* 3-DOT MENU */
-.three-dot-btn{background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px 6px;border-radius:4px;transition:all .2s;flex-shrink:0;line-height:1}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:clamp(11px,1.6vw,13px);font-weight:500;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.task-time{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.2vw,10px);color:var(--muted)}
+.task-pts{font-family:'Syne',sans-serif;font-size:clamp(11px,1.5vw,12px);font-weight:700;color:var(--accent);flex-shrink:0}
+.three-dot-btn{background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 5px;border-radius:4px;transition:all .2s;flex-shrink:0;line-height:1}
 .three-dot-btn:hover{color:var(--text);background:var(--surface2)}
-.dot-menu{position:absolute;right:12px;top:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:50;min-width:120px;box-shadow:0 8px 24px rgba(0,0,0,.4);overflow:hidden;display:none}
+.dot-menu{position:absolute;right:8px;top:calc(100% + 2px);background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:60;min-width:120px;box-shadow:0 8px 24px rgba(0,0,0,.5);overflow:hidden;display:none}
 .dot-menu.open{display:block}
-.dot-menu-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;cursor:pointer;transition:background .15s;font-weight:500}
+.dot-menu-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:clamp(11px,1.5vw,12px);cursor:pointer;transition:background .15s;font-weight:500}
 .dot-menu-item:hover{background:var(--surface2)}
 .dot-menu-item.danger{color:var(--red)}
 .dot-menu-item.danger:hover{background:rgba(224,82,82,.1)}
-
-.add-task-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;cursor:pointer;color:var(--muted);font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;transition:all .2s;border-top:1px dashed var(--border)}
+.add-task-btn{display:flex;align-items:center;gap:7px;padding:9px clamp(12px,2vw,15px);cursor:pointer;color:var(--muted);font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);letter-spacing:1px;text-transform:uppercase;transition:all .2s;border-top:1px dashed var(--border)}
 .add-task-btn:hover{color:var(--accent)}
 
-/* ═══ REWARDS ═══ */
-.rewards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:16px 28px}
-.reward-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;transition:all .3s;position:relative;overflow:hidden}
+/* REWARDS */
+.rewards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,20vw,170px),1fr));gap:clamp(8px,1.5vw,10px);padding:clamp(14px,2vw,18px) clamp(16px,3vw,28px)}
+.reward-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:clamp(12px,2vw,14px);text-align:center;transition:all .3s;position:relative;overflow:hidden}
 .reward-card.unlocked{border-color:var(--accent);background:rgba(200,168,75,.04)}
-.reward-card.unlocked::after{content:'✓ UNLOCKED';position:absolute;top:8px;right:9px;font-family:'Syne Mono',monospace;font-size:8px;color:var(--green);letter-spacing:1px}
-.reward-icon{font-size:28px;margin-bottom:8px}
-.reward-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.reward-desc{font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4}
-.reward-cost{display:inline-flex;align-items:center;gap:3px;background:var(--surface2);padding:3px 8px;border-radius:12px;font-family:'Syne Mono',monospace;font-size:10px;font-weight:700;color:var(--accent)}
+.reward-card.unlocked::after{content:'✓';position:absolute;top:7px;right:9px;font-size:11px;color:var(--green);font-weight:700}
+.reward-icon{font-size:clamp(22px,3.5vw,28px);margin-bottom:7px}
+.reward-name{font-family:'Syne',sans-serif;font-size:clamp(10px,1.5vw,12px);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.reward-desc{font-size:clamp(9px,1.3vw,10px);color:var(--muted);margin-bottom:8px;line-height:1.4}
+.reward-cost{display:inline-flex;align-items:center;gap:3px;background:var(--surface2);padding:3px 8px;border-radius:12px;font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);font-weight:700;color:var(--accent)}
 
-/* ═══ STREAK ═══ */
-.streak-wrap{padding:16px 28px}
-.streak-bar{display:flex;gap:4px;flex-wrap:wrap}
-.streak-day{width:26px;height:26px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:'Syne Mono',monospace;font-size:8px;font-weight:700;color:var(--muted);transition:all .3s}
+/* STREAK */
+.streak-wrap{padding:clamp(14px,2vw,18px) clamp(16px,3vw,28px)}
+.streak-bar{display:flex;gap:clamp(3px,0.6vw,5px);flex-wrap:wrap}
+.streak-day{width:clamp(22px,3.5vw,26px);height:clamp(22px,3.5vw,26px);border-radius:4px;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:'Syne Mono',monospace;font-size:clamp(7px,1.1vw,9px);font-weight:700;color:var(--muted);transition:all .3s}
 .streak-day.completed{background:var(--accent);border-color:var(--accent2);color:#000}
 .streak-day.today{border-color:var(--accent);color:var(--accent)}
 
-/* ═══ PROGRESS / LOGS PAGE ═══ */
-.stat-log-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.stat-log-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
-.stat-log-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-.stat-row-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+/* PROGRESS PAGE */
+.stat-log-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(160px,25vw,220px),1fr));gap:clamp(8px,1.5vw,12px);margin-bottom:20px}
+.stat-log-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:clamp(12px,2vw,16px)}
+.stat-log-title{font-family:'Syne',sans-serif;font-size:clamp(9px,1.4vw,11px);font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.stat-row-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:clamp(11px,1.6vw,13px)}
 .stat-row-item:last-child{border-bottom:none}
 .stat-row-label{color:var(--muted)}
-.stat-row-vals{display:flex;align-items:center;gap:10px}
-.stat-baseline{font-family:'Syne Mono',monospace;font-size:11px;color:var(--muted)}
-.stat-current{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent)}
-.stat-delta{font-family:'Syne Mono',monospace;font-size:10px;padding:2px 6px;border-radius:10px;background:rgba(76,175,125,.15);color:var(--green)}
+.stat-row-vals{display:flex;align-items:center;gap:8px}
+.stat-baseline{font-family:'Syne Mono',monospace;font-size:clamp(10px,1.4vw,11px);color:var(--muted)}
+.stat-current{font-family:'Syne',sans-serif;font-size:clamp(13px,2vw,15px);font-weight:700;color:var(--accent)}
+.stat-delta{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);padding:2px 6px;border-radius:10px;background:rgba(76,175,125,.15);color:var(--green)}
 .stat-delta.neg{background:rgba(224,82,82,.15);color:var(--red)}
-
-.log-entry{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.log-entry{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .log-entry:last-child{border-bottom:none}
-.log-date{font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0;padding-top:2px;min-width:70px}
-.log-text{font-size:13px;color:var(--text);line-height:1.5}
-.log-pts{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;margin-left:auto}
+.log-date{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);color:var(--muted);flex-shrink:0;padding-top:2px;min-width:68px}
+.log-text{font-size:clamp(11px,1.6vw,13px);color:var(--text);line-height:1.5;flex:1;min-width:0}
+.log-pts{font-family:'Syne',sans-serif;font-size:clamp(11px,1.5vw,12px);font-weight:700;color:var(--accent);flex-shrink:0;margin-left:auto;padding-left:8px}
+.action-btn{background:var(--accent);border:none;color:#000;padding:9px 16px;border-radius:7px;font-family:'Syne',sans-serif;font-size:clamp(10px,1.5vw,12px);font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.action-btn:hover{background:var(--accent2)}
+.section-label{font-family:'Syne',sans-serif;font-size:clamp(9px,1.4vw,11px);font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 
-.update-stat-btn{background:var(--accent);border:none;color:#000;padding:10px 18px;border-radius:7px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.update-stat-btn:hover{background:var(--accent2)}
+/* RUN LOG */
+.run-entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:clamp(11px,1.6vw,13px)}
+.run-entry:last-child{border-bottom:none}
+.run-date{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);color:var(--muted);min-width:70px;flex-shrink:0}
+.run-info{flex:1}
+.run-dist{font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);font-size:clamp(13px,2vw,15px)}
+.run-time{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);color:var(--muted);margin-top:2px}
+.run-pace{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);color:var(--green);margin-left:auto}
 
-/* ═══ DIET PAGE ═══ */
-.diet-section{margin-bottom:24px}
-.diet-section-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.meal-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px}
-.meal-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px}
-.meal-desc{font-size:12px;color:var(--muted);line-height:1.6}
-.meal-macro{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-.macro-chip{font-family:'Syne Mono',monospace;font-size:10px;padding:3px 8px;border-radius:10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+/* DIET PAGE */
+.diet-section{margin-bottom:22px}
+.diet-section-title{font-family:'Syne',sans-serif;font-size:clamp(11px,1.6vw,13px);font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.meal-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:clamp(12px,2vw,16px);margin-bottom:10px}
+.meal-name{font-family:'Syne',sans-serif;font-size:clamp(12px,1.8vw,14px);font-weight:700;margin-bottom:6px}
+.meal-desc{font-size:clamp(11px,1.6vw,12px);color:var(--muted);line-height:1.6}
+.meal-macro{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.macro-chip{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);padding:3px 8px;border-radius:10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
 .macro-chip.protein{border-color:rgba(74,144,217,.4);color:var(--blue)}
 .macro-chip.carb{border-color:rgba(200,168,75,.4);color:var(--accent)}
 .macro-chip.fat{border-color:rgba(224,82,82,.3);color:var(--red)}
-.tip-card{background:rgba(200,168,75,.06);border:1px solid rgba(200,168,75,.2);border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:13px;color:var(--text);line-height:1.6}
+.tip-card{background:rgba(200,168,75,.05);border:1px solid rgba(200,168,75,.18);border-radius:10px;padding:clamp(12px,2vw,14px) clamp(14px,2vw,16px);margin-bottom:10px;font-size:clamp(11px,1.6vw,13px);color:var(--text);line-height:1.6}
 .tip-card strong{color:var(--accent);font-family:'Syne',sans-serif;font-weight:700}
+.nutrition-disclaimer{background:rgba(74,144,217,.07);border:1px solid rgba(74,144,217,.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:clamp(10px,1.4vw,11px);color:var(--blue);line-height:1.5;font-family:'Syne Mono',monospace}
 
-/* ═══ SETTINGS PANEL ═══ */
+/* FOOD LOG */
+.food-log-entry{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:start}
+.food-log-entry:last-child{border-bottom:none}
+.food-log-name{font-size:clamp(12px,1.8vw,14px);font-weight:500;margin-bottom:3px}
+.food-log-amount{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);color:var(--muted)}
+.food-log-macros{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.food-log-macro{font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,10px);padding:2px 7px;border-radius:8px;background:var(--surface2);border:1px solid var(--border)}
+.food-log-macro.p{border-color:rgba(74,144,217,.4);color:var(--blue)}
+.food-log-macro.c{border-color:rgba(200,168,75,.4);color:var(--accent)}
+.food-log-macro.f{border-color:rgba(224,82,82,.3);color:var(--red)}
+.food-log-date{font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,9px);color:var(--muted);text-align:right;white-space:nowrap}
+.food-log-del{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px;transition:color .2s}
+.food-log-del:hover{color:var(--red)}
+.daily-macro-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:clamp(12px,2vw,16px);margin-bottom:14px}
+.daily-macro-title{font-family:'Syne',sans-serif;font-size:clamp(9px,1.4vw,11px);font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.macro-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.macro-row:last-child{margin-bottom:0}
+.macro-row-label{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);color:var(--muted);width:60px;flex-shrink:0}
+.macro-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.macro-fill{height:100%;border-radius:3px;transition:width .5s}
+.macro-fill.p{background:var(--blue)}
+.macro-fill.c{background:var(--accent)}
+.macro-fill.f{background:var(--red)}
+.macro-row-val{font-family:'Syne',sans-serif;font-size:clamp(11px,1.5vw,12px);font-weight:700;width:55px;text-align:right;flex-shrink:0}
+
+/* SETTINGS */
 .settings-overlay{position:fixed;inset:0;z-index:140;display:none}
 .settings-overlay.open{display:block}
-.settings-panel{position:fixed;top:0;right:-320px;width:300px;height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:150;transition:right .3s;overflow-y:auto;padding:24px 20px}
+.settings-panel{position:fixed;top:0;right:-320px;width:min(300px,90vw);height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:150;transition:right .3s;overflow-y:auto;padding:22px 18px}
 .settings-panel.open{right:0}
-.settings-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.settings-title{font-family:'Syne',sans-serif;font-size:clamp(16px,2.5vw,20px);font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
 .settings-close{background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer}
-.settings-sec{margin-bottom:22px}
-.settings-sec-title{font-family:'Syne Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.theme-opt{padding:9px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-align:center;transition:all .2s;color:var(--text)}
+.settings-sec{margin-bottom:20px}
+.settings-sec-title{font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,10px);font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.theme-opt{padding:9px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:clamp(10px,1.4vw,11px);font-weight:700;letter-spacing:1px;text-align:center;transition:all .2s;color:var(--text)}
 .theme-opt:hover,.theme-opt.active{border-color:var(--accent);color:var(--accent)}
-.username-chip{font-family:'Syne Mono',monospace;font-size:12px;color:var(--text);background:var(--surface2);border:1px solid var(--border);padding:10px 13px;border-radius:7px}
+.username-chip{font-family:'Syne Mono',monospace;font-size:clamp(11px,1.6vw,12px);color:var(--text);background:var(--surface2);border:1px solid var(--border);padding:9px 12px;border-radius:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* ═══ MODAL ═══ */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-bg.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:30px;width:100%;max-width:400px}
-.modal-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:20px}
-.modal-field{margin-bottom:13px}
-.modal-field label{display:block;font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
-.modal-field input,.modal-field select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 13px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border .2s}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:clamp(20px,4vw,28px);width:100%;max-width:420px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Syne',sans-serif;font-size:clamp(16px,2.5vw,20px);font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:18px}
+.modal-field{margin-bottom:12px}
+.modal-field label{display:block;font-family:'Syne Mono',monospace;font-size:clamp(8px,1.2vw,10px);color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.modal-field input,.modal-field select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-family:'Inter',sans-serif;font-size:clamp(12px,1.8vw,14px);outline:none;transition:border .2s}
 .modal-field input:focus,.modal-field select:focus{border-color:var(--accent)}
 .modal-field select option{background:var(--surface2)}
-.modal-actions{display:flex;gap:8px;margin-top:20px}
-.modal-btn{flex:1;padding:12px;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.modal-actions{display:flex;gap:8px;margin-top:18px}
+.modal-btn{flex:1;padding:11px;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:clamp(12px,1.8vw,14px);font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .modal-btn.primary{background:var(--accent);color:#000}
 .modal-btn.primary:hover{background:var(--accent2)}
 .modal-btn.secondary{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
 .modal-btn.secondary:hover{border-color:var(--accent);color:var(--accent)}
 
-/* ═══ STAT UPDATE MODAL ═══ */
+/* FOOD SEARCH RESULTS */
+.food-results{margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:200px;overflow-y:auto;display:none}
+.food-results.open{display:block}
+.food-result-item{padding:10px 13px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border)}
+.food-result-item:last-child{border-bottom:none}
+.food-result-item:hover{background:var(--surface)}
+.fri-name{font-size:clamp(12px,1.8vw,13px);font-weight:500}
+.fri-macros{font-family:'Syne Mono',monospace;font-size:clamp(9px,1.3vw,10px);color:var(--muted);margin-top:2px}
+
+/* STAT UPDATE */
 .stat-input-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
 .stat-input-row:last-child{border-bottom:none}
-.stat-input-label{font-size:13px;color:var(--text)}
-.stat-input-field{width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;outline:none;text-align:center}
+.stat-input-label{font-size:clamp(12px,1.8vw,13px);color:var(--text)}
+.stat-input-field{width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-family:'Syne',sans-serif;font-size:clamp(12px,1.8vw,13px);font-weight:700;outline:none;text-align:center}
 .stat-input-field:focus{border-color:var(--accent)}
 
 /* TOAST */
-.toast{position:fixed;bottom:22px;right:22px;background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:10px;z-index:999;transform:translateX(240px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);max-width:300px}
+.toast{position:fixed;bottom:clamp(14px,3vw,22px);right:clamp(14px,3vw,22px);background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:11px 16px;display:flex;align-items:center;gap:10px;z-index:999;transform:translateX(240px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);max-width:min(290px,85vw)}
 .toast.show{transform:translateX(0);opacity:1}
-.toast-icon{font-size:20px}
-.toast-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
-.toast-msg{font-size:11px;color:var(--muted);margin-top:1px}
+.toast-icon{font-size:clamp(16px,2.5vw,20px)}
+.toast-title{font-family:'Syne',sans-serif;font-size:clamp(11px,1.6vw,13px);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.toast-msg{font-size:clamp(10px,1.4vw,11px);color:var(--muted);margin-top:1px}
 
-/* MOBILE SIDEBAR TOGGLE */
-.mob-menu-btn{display:none;background:transparent;border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;align-items:center;justify-content:center}
+/* MOB OVERLAY */
 .sidebar-mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
 
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
+/* RESPONSIVE */
+@media(max-width:900px){
+  :root{--sw:200px}
+}
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%)}
   .sidebar.mob-open{transform:translateX(0)}
@@ -290,9 +334,12 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   .mob-menu-btn{display:flex}
   .stats-row{grid-template-columns:repeat(2,1fr)}
   .stat-log-grid{grid-template-columns:1fr}
-  .page-body{padding:16px}
-  .sections{padding:12px 16px}
-  .rewards-grid{padding:12px 16px}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .rewards-grid{grid-template-columns:1fr 1fr}
+  .task-name{font-size:12px}
+  .macro-row-label{width:50px}
 }
 </style>
 </head>
@@ -350,8 +397,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div class="onboard-options">
         <div class="onboard-option" onclick="selectOb(this,'goal','ssg')"><div class="ob-check"></div><div><div class="ob-label">Join SSG Special Forces</div><div class="ob-sub">The ultimate mission</div></div></div>
         <div class="onboard-option" onclick="selectOb(this,'goal','pma')"><div class="ob-check"></div><div><div class="ob-label">Get into PMA Kakul</div><div class="ob-sub">Officer commission path</div></div></div>
-        <div class="onboard-option" onclick="selectOb(this,'goal','army')"><div class="ob-check"></div><div><div class="ob-label">Join Pakistan Army</div><div class="ob-sub">Soldier or officer path</div></div></div>
-        <div class="onboard-option" onclick="selectOb(this,'goal','boards')"><div class="ob-check"></div><div><div class="ob-label">Pass Board Exams first</div><div class="ob-sub">Matric / FSc focus</div></div></div>
+        <div class="onboard-option" onclick="selectOb(this,'goal','army')"><div class="ob-check"></div><div><div class="ob-label">Join Pakistan Army</div></div></div>
+        <div class="onboard-option" onclick="selectOb(this,'goal','boards')"><div class="ob-check"></div><div><div class="ob-label">Pass Board Exams first</div></div></div>
       </div>
       <button class="onboard-btn" onclick="nextOb()">Continue</button>
     </div>
@@ -368,7 +415,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </div>
     <div class="onboard-step" id="obStep2">
       <div class="onboard-title">Fitness Level 💪</div>
-      <div class="onboard-sub">Be honest — sets realistic training targets.</div>
+      <div class="onboard-sub">Be honest — sets realistic targets.</div>
       <div class="onboard-options">
         <div class="onboard-option" onclick="selectOb(this,'fitness','beginner')"><div class="ob-check"></div><div><div class="ob-label">Beginner</div><div class="ob-sub">Rarely exercise</div></div></div>
         <div class="onboard-option" onclick="selectOb(this,'fitness','moderate')"><div class="ob-check"></div><div><div class="ob-label">Moderate</div><div class="ob-sub">Exercise sometimes</div></div></div>
@@ -392,21 +439,21 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <!-- APP -->
 <div id="appScreen">
   <div class="app-layout">
-
-    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
       <div class="sidebar-logo">
         <div class="sidebar-logo-text">SSG</div>
         <div class="sidebar-logo-sub">Operation Excellence</div>
       </div>
       <nav class="sidebar-nav">
-        <div class="nav-section-label">Main</div>
+        <div class="nav-label">Main</div>
         <div class="nav-item active" onclick="goPage('dashboard')" id="nav-dashboard"><span class="nav-item-icon">📊</span>Dashboard</div>
         <div class="nav-item" onclick="goPage('progress')" id="nav-progress"><span class="nav-item-icon">📈</span>Progress & Logs</div>
-        <div class="nav-item" onclick="goPage('diet')" id="nav-diet"><span class="nav-item-icon">🥗</span>Diet & Nutrition</div>
-        <div class="nav-section-label">More</div>
+        <div class="nav-item" onclick="goPage('food')" id="nav-food"><span class="nav-item-icon">🥗</span>Food Log</div>
+        <div class="nav-item" onclick="goPage('running')" id="nav-running"><span class="nav-item-icon">🏃</span>Run Log</div>
+        <div class="nav-item" onclick="goPage('diet')" id="nav-diet"><span class="nav-item-icon">📋</span>Diet Guide</div>
+        <div class="nav-label">More</div>
         <div class="nav-item" onclick="goPage('rewards')" id="nav-rewards"><span class="nav-item-icon">🏆</span>Rewards</div>
-        <div class="nav-item" onclick="goPage('streak')" id="nav-streak"><span class="nav-item-icon">🔥</span>Streak Calendar</div>
+        <div class="nav-item" onclick="goPage('streak')" id="nav-streak"><span class="nav-item-icon">🔥</span>Streak</div>
         <div class="nav-item" onclick="openSettings()" id="nav-settings"><span class="nav-item-icon">⚙️</span>Settings</div>
       </nav>
       <div class="sidebar-bottom">
@@ -415,16 +462,14 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       </div>
     </div>
 
-    <!-- MOBILE OVERLAY -->
     <div class="sidebar-mob-overlay" id="mobOverlay" onclick="closeMobSidebar()"></div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
 
-      <!-- DASHBOARD PAGE -->
+      <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="page-header">
-          <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px">
             <button class="mob-menu-btn" onclick="openMobSidebar()">☰</button>
             <div class="page-title">Daily <span>Mission</span></div>
           </div>
@@ -452,96 +497,94 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="sections" id="sectionsContainer"></div>
       </div>
 
-      <!-- PROGRESS PAGE -->
+      <!-- PROGRESS -->
       <div class="page" id="page-progress">
         <div class="page-header">
-          <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px">
             <button class="mob-menu-btn" onclick="openMobSidebar()">☰</button>
             <div class="page-title">Progress <span>&amp; Logs</span></div>
           </div>
-          <button class="update-stat-btn" onclick="openStatModal()">+ Update Stats</button>
+          <button class="action-btn" onclick="openStatModal()">+ Update Stats</button>
         </div>
         <div class="page-body">
           <div class="stat-log-grid" id="statLogGrid"></div>
-          <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Recent Activity Log</div>
+          <div class="section-label">Recent Activity</div>
           <div class="section"><div class="section-body" style="display:block;padding:0 16px" id="activityLog"></div></div>
         </div>
       </div>
 
-      <!-- DIET PAGE -->
+      <!-- FOOD LOG -->
+      <div class="page" id="page-food">
+        <div class="page-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="mob-menu-btn" onclick="openMobSidebar()">☰</button>
+            <div class="page-title">Food <span>Log</span></div>
+          </div>
+          <button class="action-btn" onclick="openFoodModal()">+ Log Food</button>
+        </div>
+        <div class="page-body">
+          <div class="nutrition-disclaimer">⚠️ Nutrition values are estimates based on standard Pakistani food databases. Actual values vary based on cooking method and portion size. Use as a general guide, not precise medical data.</div>
+          <div class="daily-macro-bar" id="dailyMacroBar"></div>
+          <div class="section-label">Today's Food Log</div>
+          <div class="section"><div class="section-body" style="display:block;padding:0 16px" id="foodLogList"></div></div>
+          <div style="margin-top:16px">
+            <div class="section-label">Previous Days</div>
+            <div class="section"><div class="section-body" style="display:block;padding:0 16px" id="prevFoodLog"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RUN LOG -->
+      <div class="page" id="page-running">
+        <div class="page-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="mob-menu-btn" onclick="openMobSidebar()">☰</button>
+            <div class="page-title">Run <span>Log</span></div>
+          </div>
+          <button class="action-btn" onclick="openRunModal()">+ Log Run</button>
+        </div>
+        <div class="page-body">
+          <div class="stat-log-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px" id="runStatsBar"></div>
+          <div class="section-label">All Runs</div>
+          <div class="section"><div class="section-body" style="display:block;padding:0 16px" id="runLogList"></div></div>
+        </div>
+      </div>
+
+      <!-- DIET GUIDE -->
       <div class="page" id="page-diet">
         <div class="page-header">
-          <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px">
             <button class="mob-menu-btn" onclick="openMobSidebar()">☰</button>
-            <div class="page-title">Diet <span>&amp; Nutrition</span></div>
+            <div class="page-title">Diet <span>Guide</span></div>
           </div>
         </div>
         <div class="page-body">
           <div class="diet-section">
             <div class="diet-section-title">🥚 Your Meal Plan (Zero Budget)</div>
-            <div class="tip-card"><strong>Your Goal:</strong> Build muscle, increase stamina and endurance for SSG preparation. Focus on high protein, complex carbs and healthy fats from affordable Pakistani foods.</div>
-            <div class="meal-card">
-              <div class="meal-name">Sehri / Breakfast</div>
-              <div class="meal-desc">3–4 boiled eggs + 2 rotis with desi ghee + 1 glass of doodh (milk). Eggs are your best free protein. Ghee gives sustained energy for morning training.</div>
-              <div class="meal-macro"><span class="macro-chip protein">~30g Protein</span><span class="macro-chip carb">~60g Carbs</span><span class="macro-chip fat">~18g Fat</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-name">Mid-Morning (after school)</div>
-              <div class="meal-desc">Chana (chickpeas) chaat or leftover daal with roti. Chana is one of the best muscle-building foods available cheaply in Pakistan — high protein, high fibre, slow digesting.</div>
-              <div class="meal-macro"><span class="macro-chip protein">~18g Protein</span><span class="macro-chip carb">~55g Carbs</span><span class="macro-chip fat">~8g Fat</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-name">Iftar / Lunch</div>
-              <div class="meal-desc">Dates (3–4) + water first. Then daal (masoor or mash) with 2–3 rotis. Daal is your daily protein base — eat it every single day. Add a raw onion or tomato on the side.</div>
-              <div class="meal-macro"><span class="macro-chip protein">~22g Protein</span><span class="macro-chip carb">~80g Carbs</span><span class="macro-chip fat">~6g Fat</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-name">Dinner</div>
-              <div class="meal-desc">Yakhni (bone broth) soup + sabzi (any vegetable) + 2 rotis. Yakhni is extremely cheap and extremely powerful — it contains collagen, gelatin, and minerals for joint recovery and tendon strength. Drink it every night if possible.</div>
-              <div class="meal-macro"><span class="macro-chip protein">~25g Protein</span><span class="macro-chip carb">~45g Carbs</span><span class="macro-chip fat">~10g Fat</span></div>
-            </div>
+            <div class="tip-card"><strong>Your Goal:</strong> Build muscle and stamina for SSG. Focus on high protein from affordable Pakistani foods.</div>
+            <div class="meal-card"><div class="meal-name">Sehri / Breakfast</div><div class="meal-desc">3–4 boiled eggs + 2 rotis with desi ghee + 1 glass milk. Eggs are your best cheap protein source.</div><div class="meal-macro"><span class="macro-chip protein">~30g Protein</span><span class="macro-chip carb">~60g Carbs</span><span class="macro-chip fat">~18g Fat</span></div></div>
+            <div class="meal-card"><div class="meal-name">Mid-Morning</div><div class="meal-desc">Chana chaat or daal with roti. Chana is high protein, high fibre, slow digesting — perfect for training.</div><div class="meal-macro"><span class="macro-chip protein">~18g Protein</span><span class="macro-chip carb">~55g Carbs</span><span class="macro-chip fat">~8g Fat</span></div></div>
+            <div class="meal-card"><div class="meal-name">Iftar / Lunch</div><div class="meal-desc">Dates + water first. Then daal masoor/mash with 2–3 rotis. Eat daal every single day.</div><div class="meal-macro"><span class="macro-chip protein">~22g Protein</span><span class="macro-chip carb">~80g Carbs</span><span class="macro-chip fat">~6g Fat</span></div></div>
+            <div class="meal-card"><div class="meal-name">Dinner</div><div class="meal-desc">Yakhni (bone broth) soup + sabzi + 2 rotis. Yakhni strengthens tendons and joints — drink nightly.</div><div class="meal-macro"><span class="macro-chip protein">~25g Protein</span><span class="macro-chip carb">~45g Carbs</span><span class="macro-chip fat">~10g Fat</span></div></div>
           </div>
-
           <div class="diet-section">
-            <div class="diet-section-title">💡 Key Rules for SSG Preparation</div>
-            <div class="tip-card"><strong>Water:</strong> Drink at least 3 litres per day. Most people training hard in Pakistan are chronically dehydrated. This single change will improve your endurance noticeably within 2 weeks.</div>
-            <div class="tip-card"><strong>Eggs are non-negotiable:</strong> Try to eat 3–5 eggs every single day. They are the cheapest complete protein source available to you. Boil them, fry them, make omelette — but eat them daily.</div>
-            <div class="tip-card"><strong>Eat before training:</strong> Have at least a roti with egg or chana 30–45 mins before your workout. Training on an empty stomach kills performance and muscle growth.</div>
-            <div class="tip-card"><strong>Yakhni (Bone Broth):</strong> Ask your family to make this regularly. Simmer beef or chicken bones for 4–6 hours. Drink one cup daily — it directly strengthens your tendons, ligaments and joints which is critical for pull-up and barbell training.</div>
-            <div class="tip-card"><strong>Avoid:</strong> Cold drinks, chips, biscuits, excessive chai, and skipping meals. These directly hurt your training results.</div>
+            <div class="diet-section-title">💡 Key Rules</div>
+            <div class="tip-card"><strong>Water:</strong> 3+ litres daily. Most training performance issues in Pakistan are dehydration.</div>
+            <div class="tip-card"><strong>Eggs:</strong> 3–5 daily, non-negotiable. Cheapest complete protein available to you.</div>
+            <div class="tip-card"><strong>Yakhni:</strong> Simmer bones 4–6 hours. One cup daily strengthens tendons and ligaments directly.</div>
+            <div class="tip-card"><strong>Avoid:</strong> Cold drinks, chips, biscuits, excessive chai, and skipping meals.</div>
           </div>
-
           <div class="diet-section">
-            <div class="diet-section-title">🏋️ Your Workout Plan (Iron Hide)</div>
-            <div class="meal-card">
-              <div class="meal-name">4x Weekly Workout (Mon / Tue / Thu / Sat)</div>
-              <div class="meal-desc">
-                <strong style="color:var(--accent)">1. Assisted Pull-ups</strong> — 5 sets to failure (use resistance band looped on bar for assist)<br><br>
-                <strong style="color:var(--accent)">2. Bent-over Barbell Rows</strong> — 4 sets × 12 reps @ 12kg<br><br>
-                <strong style="color:var(--accent)">3. Zercher Squats</strong> — 4 sets × 15 reps (barbell in elbow crooks @ 12kg)<br><br>
-                <strong style="color:var(--accent)">4. Push-ups</strong> — 4 sets to max<br><br>
-                <strong style="color:var(--accent)">5. Barbell Curls</strong> — 3 sets × 12 reps @ 12kg<br><br>
-                <strong style="color:var(--accent)">6. Skipping Rope</strong> — 3 × 3 minute rounds (rest 1 min between)
-              </div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-name">Current Baseline Stats (Starting Point)</div>
-              <div class="meal-desc">
-                Pull-ups: <strong style="color:var(--accent)">3 (assisted)</strong> → SSG Goal: 15<br>
-                Push-ups: <strong style="color:var(--accent)">10</strong> → SSG Goal: 40 in 1 min<br>
-                Squats: <strong style="color:var(--accent)">30+</strong> → SSG Goal: 50<br>
-                Barbell Curls: <strong style="color:var(--accent)">22 @ 12kg</strong><br>
-                Plank: <strong style="color:var(--accent)">1 minute</strong> → SSG Goal: 2 minutes
-              </div>
-            </div>
+            <div class="diet-section-title">🏋️ Iron Hide Workout (4x Weekly)</div>
+            <div class="meal-card"><div class="meal-name">Mon / Tue / Thu / Sat</div><div class="meal-desc" style="line-height:1.9"><strong style="color:var(--accent)">1.</strong> Assisted Pull-ups — 5 sets to failure (band assist)<br><strong style="color:var(--accent)">2.</strong> Bent-over Barbell Rows — 4×12 @ 12kg<br><strong style="color:var(--accent)">3.</strong> Zercher Squats — 4×15 @ 12kg<br><strong style="color:var(--accent)">4.</strong> Push-ups — 4 sets to max<br><strong style="color:var(--accent)">5.</strong> Barbell Curls — 3×12 @ 12kg<br><strong style="color:var(--accent)">6.</strong> Skipping Rope — 3 × 3 min rounds</div></div>
           </div>
         </div>
       </div>
 
-      <!-- REWARDS PAGE -->
+      <!-- REWARDS -->
       <div class="page" id="page-rewards">
         <div class="page-header">
-          <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px">
             <button class="mob-menu-btn" onclick="openMobSidebar()">☰</button>
             <div class="page-title">Rewards <span>&amp; Ranks</span></div>
           </div>
@@ -549,10 +592,10 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="rewards-grid" id="rewardsGrid"></div>
       </div>
 
-      <!-- STREAK PAGE -->
+      <!-- STREAK -->
       <div class="page" id="page-streak">
         <div class="page-header">
-          <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px">
             <button class="mob-menu-btn" onclick="openMobSidebar()">☰</button>
             <div class="page-title">30-Day <span>Streak</span></div>
           </div>
@@ -560,18 +603,15 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="streak-wrap"><div class="streak-bar" id="streakCalendar"></div></div>
       </div>
 
-    </div><!-- end main-content -->
-  </div><!-- end app-layout -->
-</div><!-- end appScreen -->
+    </div>
+  </div>
+</div>
 
-<!-- SETTINGS PANEL -->
+<!-- SETTINGS -->
 <div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
 <div class="settings-panel" id="settingsPanel">
   <div class="settings-title">Settings <button class="settings-close" onclick="closeSettings()">✕</button></div>
-  <div class="settings-sec">
-    <div class="settings-sec-title">Account</div>
-    <div class="username-chip" id="usernameDisplay">—</div>
-  </div>
+  <div class="settings-sec"><div class="settings-sec-title">Account</div><div class="username-chip" id="usernameDisplay">—</div></div>
   <div class="settings-sec">
     <div class="settings-sec-title">Theme</div>
     <div class="theme-grid">
@@ -584,7 +624,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   </div>
   <div class="settings-sec">
     <div class="settings-sec-title">Ramadan Mode</div>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:7px">
       <button class="theme-opt" style="flex:1" onclick="setRamadan(true)" id="ramOnBtn">🌙 On</button>
       <button class="theme-opt" style="flex:1" onclick="setRamadan(false)" id="ramOffBtn">Off</button>
     </div>
@@ -601,7 +641,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="modal-field"><label>Category</label>
       <select id="taskSectionInput">
         <option value="prayer">🕌 Daily Prayers</option>
-        <option value="fasting">🌙 Ramadan & Quitting</option>
+        <option value="fasting">🌙 Ramadan</option>
         <option value="study">📚 Study Sessions</option>
         <option value="physical">💪 Physical Training</option>
         <option value="recovery">😴 Sleep & Recovery</option>
@@ -615,7 +655,52 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   </div>
 </div>
 
-<!-- STAT UPDATE MODAL -->
+<!-- FOOD MODAL -->
+<div class="modal-bg" id="foodModal">
+  <div class="modal">
+    <div class="modal-title">Log Food</div>
+    <div class="modal-field">
+      <label>Search Food</label>
+      <input type="text" id="foodSearch" placeholder="e.g. daal, roti, egg..." oninput="searchFood(this.value)" autocomplete="off">
+      <div class="food-results" id="foodResults"></div>
+    </div>
+    <div id="selectedFoodInfo" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px" id="selFoodName">—</div>
+      <div style="font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted)" id="selFoodMacros">—</div>
+    </div>
+    <div class="modal-field"><label>Amount</label><input type="text" id="foodAmount" placeholder="e.g. 1 cup, 2 rotis, 100g"></div>
+    <div class="modal-field"><label>Meal (optional)</label>
+      <select id="foodMeal">
+        <option value="Sehri/Breakfast">Sehri / Breakfast</option>
+        <option value="Mid-Morning">Mid-Morning</option>
+        <option value="Lunch/Iftar">Lunch / Iftar</option>
+        <option value="Dinner">Dinner</option>
+        <option value="Snack">Snack</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeFoodModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="saveFood()">Log It</button>
+    </div>
+  </div>
+</div>
+
+<!-- RUN MODAL -->
+<div class="modal-bg" id="runModal">
+  <div class="modal">
+    <div class="modal-title">Log Run</div>
+    <div class="modal-field"><label>Distance (km)</label><input type="number" id="runDist" placeholder="e.g. 3.5" min="0.1" step="0.1"></div>
+    <div class="modal-field"><label>Time (minutes)</label><input type="number" id="runTime" placeholder="e.g. 25" min="1"></div>
+    <div class="modal-field"><label>Notes (optional)</label><input type="text" id="runNotes" placeholder="e.g. felt strong, hilly route"></div>
+    <div id="runPreview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:4px;font-family:'Syne Mono',monospace;font-size:11px;color:var(--muted)"></div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeRunModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="saveRun()">Log Run</button>
+    </div>
+  </div>
+</div>
+
+<!-- STAT MODAL -->
 <div class="modal-bg" id="statModal">
   <div class="modal">
     <div class="modal-title">Update Stats</div>
@@ -639,36 +724,69 @@ const SUPABASE_ANON_KEY='sb_publishable_73X6JDUuGnT0BDoy3v0gyQ_RLVI5xcf';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-/* ═══ DEFAULT TASKS ═══ */
-const DEFAULT_TASKS=[
-  {id:'fajr',    section:'prayer',    name:'Fajr Prayer',                                      time:'4:30 AM',       pts:15},
-  {id:'dhuhr',   section:'prayer',    name:'Dhuhr Prayer',                                     time:'12:30 PM',      pts:15},
-  {id:'asr',     section:'prayer',    name:'Asr Prayer',                                       time:'4:00 PM',       pts:15},
-  {id:'maghrib', section:'prayer',    name:'Maghrib Prayer',                                   time:'6:00 PM',       pts:15},
-  {id:'isha',    section:'prayer',    name:'Isha Prayer',                                      time:'9:00 PM',       pts:15},
-  {id:'tarawih', section:'prayer',    name:'Taraweeh',                                         time:'After Isha',    pts:10, ramadanOnly:true},
-  {id:'sehri',   section:'fasting',   name:'Wake up for Sehri',                                time:'4:30 AM',       pts:10, ramadanOnly:true},
-  {id:'iftar',   section:'fasting',   name:'Break fast properly (dates + water first)',         time:'6:00 PM',       pts:10, ramadanOnly:true},
-  {id:'study1',  section:'study',     name:'Study Session 1 — Maths / Physics / Chemistry',    time:'5:00–7:30 AM',  pts:20},
-  {id:'study2',  section:'study',     name:'Study Session 2 — PST / Fehm ul Quran / Urdu',     time:'4:30–5:30 PM',  pts:15},
-  {id:'study3',  section:'study',     name:'Study Session 3 — Revision & past papers',         time:'7:00–9:00 PM',  pts:20},
-  {id:'pastpaper',section:'study',    name:'Complete at least 1 past paper question set',      time:'Session 3',     pts:15},
-  {id:'pullups', section:'physical',  name:'Assisted Pull-ups (5 sets to failure)',             time:'Workout',       pts:20},
-  {id:'rows',    section:'physical',  name:'Bent-over Barbell Rows — 4×12 @ 12kg',             time:'Workout',       pts:15},
-  {id:'squats',  section:'physical',  name:'Zercher Squats — 4×15 @ 12kg',                     time:'Workout',       pts:15},
-  {id:'pushups', section:'physical',  name:'Push-ups — 4 sets to max',                         time:'Workout',       pts:15},
-  {id:'curls',   section:'physical',  name:'Barbell Curls — 3×12 @ 12kg',                      time:'Workout',       pts:10},
-  {id:'skipping',section:'physical',  name:'Skipping Rope — 3 × 3 min rounds',                 time:'Workout',       pts:10},
-  {id:'run',     section:'physical',  name:'Running (distance logged)',                        time:'Morning',       pts:20},
-  {id:'skincare',section:'physical',  name:'Skincare routine',                                 time:'Morning/Night', pts:5},
-  {id:'nap',     section:'recovery',  name:'Afternoon nap (1:00–4:30 PM)',                     time:'1:00–4:30 PM',  pts:10},
-  {id:'sleep',   section:'recovery',  name:'Sleep by 11:00 PM',                                time:'11:00 PM',      pts:15},
-  {id:'nolaptop',section:'discipline',name:'No laptop until Study Session 3 is done',          time:'All day',       pts:15},
-  {id:'news',    section:'discipline',name:'Read Dawn / The News (current affairs)',            time:'Free time',     pts:10},
-  {id:'english', section:'discipline',name:'Practiced speaking / writing English today',        time:'Any time',      pts:10},
+/* ══ FOOD DATABASE (per 100g or per unit as noted) ══ */
+const FOOD_DB=[
+  {name:'Roti (1 piece)',        p:3,  c:28, f:1,  unit:'per roti'},
+  {name:'Daal Masoor (cooked)',  p:9,  c:20, f:0.5,unit:'per 100g'},
+  {name:'Daal Mash (cooked)',    p:8,  c:19, f:0.4,unit:'per 100g'},
+  {name:'Chana (cooked)',        p:9,  c:27, f:3,  unit:'per 100g'},
+  {name:'Boiled Egg (1)',        p:6,  c:0.5,f:5,  unit:'per egg'},
+  {name:'Fried Egg (1)',         p:6,  c:0.5,f:7,  unit:'per egg'},
+  {name:'Omelette (2 eggs)',     p:12, c:1,  f:14, unit:'per serving'},
+  {name:'Milk (1 glass 250ml)',  p:8,  c:12, f:8,  unit:'per glass'},
+  {name:'Dahi/Yogurt',           p:4,  c:5,  f:3,  unit:'per 100g'},
+  {name:'Chicken Curry',         p:25, c:6,  f:12, unit:'per 100g'},
+  {name:'Chicken Breast (grilled)',p:31,c:0, f:3.6,unit:'per 100g'},
+  {name:'Beef Qeema',            p:22, c:2,  f:15, unit:'per 100g'},
+  {name:'Rice (cooked)',         p:2.7,c:28, f:0.3,unit:'per 100g'},
+  {name:'Yakhni/Bone Broth',     p:4,  c:0,  f:1,  unit:'per cup'},
+  {name:'Paratha (1 piece)',     p:4,  c:32, f:8,  unit:'per paratha'},
+  {name:'Aloo Sabzi',            p:2,  c:17, f:4,  unit:'per 100g'},
+  {name:'Palak',                 p:3,  c:4,  f:0.4,unit:'per 100g'},
+  {name:'Banana (1)',            p:1.3,c:27, f:0.3,unit:'per banana'},
+  {name:'Apple (1)',             p:0.5,c:25, f:0.3,unit:'per apple'},
+  {name:'Dates (3)',             p:0.5,c:18, f:0,  unit:'per 3 dates'},
+  {name:'Peanut Butter (1 tbsp)',p:4,  c:3,  f:8,  unit:'per tbsp'},
+  {name:'Almonds (handful ~20g)',p:4,  c:3,  f:10, unit:'per handful'},
+  {name:'Chai (with milk, 1 cup)',p:2, c:8,  f:3,  unit:'per cup'},
+  {name:'Lassi (1 glass)',       p:5,  c:15, f:4,  unit:'per glass'},
+  {name:'Protein Shake (generic)',p:25,c:5,  f:2,  unit:'per scoop'},
+  {name:'Aloo (boiled, 1 medium)',p:2, c:17, f:0.1,unit:'per potato'},
+  {name:'Sabzi Mix (cooked)',    p:3,  c:10, f:4,  unit:'per 100g'},
+  {name:'Halwa Puri (full plate)',p:8, c:70, f:22, unit:'per plate'},
+  {name:'Biryani',               p:15, c:45, f:12, unit:'per 100g'},
+  {name:'Nihari',                p:20, c:5,  f:18, unit:'per 100g'},
 ];
 
-const SECTIONS_META={
+const DEFAULT_TASKS=[
+  {id:'fajr',    sec:'prayer',    name:'Fajr Prayer',                                      time:'4:30 AM',       pts:15},
+  {id:'dhuhr',   sec:'prayer',    name:'Dhuhr Prayer',                                     time:'12:30 PM',      pts:15},
+  {id:'asr',     sec:'prayer',    name:'Asr Prayer',                                       time:'4:00 PM',       pts:15},
+  {id:'maghrib', sec:'prayer',    name:'Maghrib Prayer',                                   time:'6:00 PM',       pts:15},
+  {id:'isha',    sec:'prayer',    name:'Isha Prayer',                                      time:'9:00 PM',       pts:15},
+  {id:'tarawih', sec:'prayer',    name:'Taraweeh',                                         time:'After Isha',    pts:10,ramOnly:true},
+  {id:'sehri',   sec:'fasting',   name:'Wake up for Sehri',                                time:'4:30 AM',       pts:10,ramOnly:true},
+  {id:'iftar',   sec:'fasting',   name:'Break fast (dates + water first)',                  time:'6:00 PM',       pts:10,ramOnly:true},
+  {id:'study1',  sec:'study',     name:'Study Session 1 — Maths / Physics / Chemistry',    time:'5:00–7:30 AM',  pts:20},
+  {id:'study2',  sec:'study',     name:'Study Session 2 — PST / Fehm ul Quran / Urdu',     time:'4:30–5:30 PM',  pts:15},
+  {id:'study3',  sec:'study',     name:'Study Session 3 — Revision & past papers',         time:'7:00–9:00 PM',  pts:20},
+  {id:'pastpaper',sec:'study',    name:'Complete at least 1 past paper question set',      time:'Session 3',     pts:15},
+  {id:'pullups', sec:'physical',  name:'Assisted Pull-ups — 5 sets to failure',             time:'Workout',       pts:20},
+  {id:'rows',    sec:'physical',  name:'Bent-over Barbell Rows — 4×12 @ 12kg',             time:'Workout',       pts:15},
+  {id:'squats',  sec:'physical',  name:'Zercher Squats — 4×15 @ 12kg',                     time:'Workout',       pts:15},
+  {id:'pushups', sec:'physical',  name:'Push-ups — 4 sets to max',                         time:'Workout',       pts:15},
+  {id:'curls',   sec:'physical',  name:'Barbell Curls — 3×12 @ 12kg',                      time:'Workout',       pts:10},
+  {id:'skipping',sec:'physical',  name:'Skipping Rope — 3 × 3 min rounds',                 time:'Workout',       pts:10},
+  {id:'run',     sec:'physical',  name:'Running (log in Run Log)',                         time:'Morning',       pts:20},
+  {id:'skincare',sec:'physical',  name:'Skincare routine',                                 time:'Morning/Night', pts:5},
+  {id:'nap',     sec:'recovery',  name:'Afternoon nap (1:00–4:30 PM)',                     time:'1:00–4:30 PM',  pts:10},
+  {id:'sleep',   sec:'recovery',  name:'Sleep by 11:00 PM',                                time:'11:00 PM',      pts:15},
+  {id:'nolaptop',sec:'discipline',name:'No laptop until Study Session 3 is done',          time:'All day',       pts:15},
+  {id:'news',    sec:'discipline',name:'Read Dawn / The News (current affairs)',            time:'Free time',     pts:10},
+  {id:'english', sec:'discipline',name:'Practiced speaking / writing English today',        time:'Any time',      pts:10},
+];
+
+const SEC_META={
   prayer:    {label:'Daily Prayers',      icon:'🕌',color:'#c8a84b'},
   fasting:   {label:'Ramadan & Fasting',  icon:'🌙',color:'#7b68ee'},
   study:     {label:'Study Sessions',     icon:'📚',color:'#4a90d9'},
@@ -679,60 +797,69 @@ const SECTIONS_META={
 
 const REWARDS=[
   {id:'r1',icon:'🪖', name:'Recruit',     desc:'You have begun your journey',        cost:0},
-  {id:'r2',icon:'⭐', name:'Soldier',     desc:'First 100 points earned',            cost:100},
+  {id:'r2',icon:'⭐', name:'Soldier',     desc:'100 points earned',                  cost:100},
   {id:'r3',icon:'🎖️',name:'Lance Naik',  desc:'500 points earned',                  cost:500},
   {id:'r4',icon:'🏅', name:'Naik',        desc:'1000 points earned',                 cost:1000},
   {id:'r5',icon:'🥇', name:'Havildar',    desc:'2000 points earned',                 cost:2000},
   {id:'r6',icon:'💎', name:'Subedar',     desc:'3500 points earned',                 cost:3500},
-  {id:'r7',icon:'🦅', name:'SSG Commando',desc:'5000 points — Elite status reached', cost:5000},
+  {id:'r7',icon:'🦅', name:'SSG Commando',desc:'5000 points — Elite status',         cost:5000},
 ];
 
 const QUOTES=[
-  'The fight is won or lost far away from witnesses — in the gym, out on the road.',
+  'The fight is won far away from witnesses — in the gym, out on the road.',
   'Discipline is the bridge between goals and accomplishment.',
   'Actions are by intentions. Make yours count.',
   'It never gets easier. You just get stronger.',
-  'Every rep, every page, every prayer — a step closer to the black stork.',
-  'SSG does not select the strongest. It selects those who refuse to quit.',
+  'Every rep, every page, every prayer — closer to the black stork.',
+  'SSG selects those who refuse to quit, not just the strongest.',
   'Champions are made when no one is watching.',
   'Suffer the pain of discipline or suffer the pain of regret.',
-  'The harder you train in peace, the less you bleed in war.',
 ];
 
 const STAT_KEYS=[
-  {key:'pullups', label:'Pull-ups (reps)',     unit:'reps', baseline:3},
-  {key:'pushups', label:'Push-ups (max)',       unit:'reps', baseline:10},
-  {key:'squats',  label:'Squats (reps)',         unit:'reps', baseline:30},
-  {key:'plank',   label:'Plank (seconds)',       unit:'sec',  baseline:60},
-  {key:'run5k',   label:'5km Run (minutes)',     unit:'min',  baseline:null},
-  {key:'weight',  label:'Body Weight (kg)',      unit:'kg',   baseline:null},
+  {key:'pullups',label:'Pull-ups (reps)',   unit:'reps',baseline:3},
+  {key:'pushups',label:'Push-ups (max)',    unit:'reps',baseline:10},
+  {key:'squats', label:'Squats (reps)',     unit:'reps',baseline:30},
+  {key:'plank',  label:'Plank (sec)',       unit:'sec', baseline:60},
+  {key:'run5k',  label:'5km Run (min)',     unit:'min', baseline:null},
+  {key:'weight', label:'Body Weight (kg)',  unit:'kg',  baseline:null},
 ];
 
+/* ══ STATE ══ */
 let currentUser=null,currentDate=dateKey(new Date()),dayCache={},totalPoints=0;
-let userProfile={ramadan:true,theme:'military',goal:null,fitness:null};
+let profile={ramadan:true,theme:'military',goal:null,fitness:null,hiddenTasks:[],taskOverrides:{}};
 let customTasks=[],editingTaskId=null,currentPage='dashboard';
-let userStats={};// {pullups:[{val,date}], pushups:[...], ...}
-let openDotMenu=null;
+let userStats={},foodLogs=[],runLogs=[];
+let openDotMenu=null,selectedFood=null;
 
 function dateKey(d){return d.toISOString().split('T')[0];}
-function getActiveTasks(){return[...DEFAULT_TASKS.filter(t=>userProfile.ramadan?true:!t.ramadanOnly),...customTasks];}
 
-/* ═══ NAVIGATION ═══ */
+function getActiveTasks(){
+  const hidden=profile.hiddenTasks||[];
+  const overrides=profile.taskOverrides||{};
+  const base=DEFAULT_TASKS
+    .filter(t=>(profile.ramadan?true:!t.ramOnly)&&!hidden.includes(t.id))
+    .map(t=>overrides[t.id]?{...t,...overrides[t.id]}:t);
+  return[...base,...customTasks];
+}
+
+/* ══ NAVIGATION ══ */
 function goPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
-  currentPage=name;
-  closeMobSidebar();
+  const ni=document.getElementById('nav-'+name);if(ni)ni.classList.add('active');
+  currentPage=name;closeMobSidebar();
   if(name==='progress')renderProgress();
   if(name==='rewards')renderRewards();
   if(name==='streak')renderStreak();
+  if(name==='food')renderFoodPage();
+  if(name==='running')renderRunPage();
 }
 function openMobSidebar(){document.getElementById('sidebar').classList.add('mob-open');document.getElementById('mobOverlay').classList.add('open');}
 function closeMobSidebar(){document.getElementById('sidebar').classList.remove('mob-open');document.getElementById('mobOverlay').classList.remove('open');}
 
-/* ═══ AUTH ═══ */
+/* ══ AUTH ══ */
 function switchTab(tab){
   document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='signup')));
   document.getElementById('loginForm').style.display=tab==='login'?'block':'none';
@@ -740,6 +867,7 @@ function switchTab(tab){
   setMsg('authMsg','','');
 }
 function setMsg(id,text,type){const el=document.getElementById(id);el.textContent=text;el.className='auth-msg '+(type||'');}
+
 async function handleSignup(){
   const u=document.getElementById('signupUsername').value.trim();
   const e=document.getElementById('signupEmail').value.trim();
@@ -753,10 +881,11 @@ async function handleSignup(){
   document.getElementById('verifyEmail').textContent=e;
   document.getElementById('verifyScreen').style.display='flex';
 }
+
 async function handleLogin(){
   const e=document.getElementById('loginEmail').value.trim();
   const p=document.getElementById('loginPassword').value;
-  if(!e||!p){setMsg('authMsg','Please enter email and password.','error');return;}
+  if(!e||!p){setMsg('authMsg','Please fill email and password.','error');return;}
   setMsg('authMsg','Logging in...','info');
   const {error}=await sb.auth.signInWithPassword({email:e,password:p});
   if(error){
@@ -765,9 +894,9 @@ async function handleLogin(){
       document.getElementById('verifyEmail').textContent=e;
       document.getElementById('verifyScreen').style.display='flex';
     }else{setMsg('authMsg',error.message,'error');}
-    return;
   }
 }
+
 async function resendVerification(){
   const e=document.getElementById('verifyEmail').textContent;
   const {error}=await sb.auth.resend({type:'signup',email:e});
@@ -775,21 +904,23 @@ async function resendVerification(){
   if(error){m.textContent=error.message;m.className='auth-msg error';}
   else{m.textContent='Email resent!';m.className='auth-msg success';}
 }
+
 function showAuth(){document.getElementById('verifyScreen').style.display='none';document.getElementById('authScreen').style.display='flex';}
+
 async function handleSignOut(){
   await sb.auth.signOut();
-  currentUser=null;dayCache={};totalPoints=0;customTasks={};
+  currentUser=null;dayCache={};totalPoints=0;customTasks=[];foodLogs=[];runLogs=[];
   document.getElementById('appScreen').style.display='none';
   document.getElementById('authScreen').style.display='flex';
 }
 
-/* ═══ ONBOARDING ═══ */
+/* ══ ONBOARDING ══ */
 let obStep=0;const obA={};
 function buildObProg(){document.getElementById('obProgress').innerHTML=Array.from({length:4},(_,i)=>`<div class="onboard-dot ${i<obStep?'done':''}"></div>`).join('');}
 function selectOb(el,key,val){el.closest('.onboard-options').querySelectorAll('.onboard-option').forEach(o=>{o.classList.remove('selected');o.querySelector('.ob-check').textContent='';});el.classList.add('selected');el.querySelector('.ob-check').textContent='✓';obA[key]=val;}
 function nextOb(){obStep++;document.querySelectorAll('.onboard-step').forEach((s,i)=>s.classList.toggle('active',i===obStep));buildObProg();}
 async function finishOnboard(){
-  userProfile.ramadan=obA.ramadan==='yes';userProfile.goal=obA.goal;userProfile.fitness=obA.fitness;
+  profile.ramadan=obA.ramadan==='yes';profile.goal=obA.goal;profile.fitness=obA.fitness;
   await saveProfile();
   document.getElementById('onboardScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
@@ -797,32 +928,72 @@ async function finishOnboard(){
 }
 function skipOnboard(){document.getElementById('onboardScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
 
-/* ═══ PROFILE ═══ */
+/* ══ PROFILE — CRITICAL: save ALL fields to prevent Ramadan reset ══ */
 async function loadProfile(){
-  const {data}=await sb.from('profiles').select('*').eq('user_id',currentUser.id).single();
-  if(data){
-    userProfile={ramadan:data.ramadan??true,theme:data.theme||'military',goal:data.goal,fitness:data.fitness};
-    customTasks=data.custom_tasks||[];
-    userStats=data.user_stats||{};
+  const {data,error}=await sb.from('profiles').select('*').eq('user_id',currentUser.id).single();
+  if(data&&!error){
+    // Explicitly load every field
+    profile.ramadan = (data.ramadan===true||data.ramadan==='true');
+    profile.theme   = data.theme||'military';
+    profile.goal    = data.goal||null;
+    profile.fitness = data.fitness||null;
+    profile.hiddenTasks  = Array.isArray(data.hidden_tasks) ? data.hidden_tasks : (data.hidden_tasks||[]);
+    profile.taskOverrides= data.task_overrides||{};
+    customTasks     = Array.isArray(data.custom_tasks) ? data.custom_tasks : [];
+    userStats       = data.user_stats||{};
+    foodLogs        = Array.isArray(data.food_logs) ? data.food_logs : [];
+    runLogs         = Array.isArray(data.run_logs) ? data.run_logs : [];
   }
-  applyTheme(userProfile.theme);
+  applyTheme(profile.theme);
 }
+
 async function saveProfile(){
-  await sb.from('profiles').upsert({user_id:currentUser.id,ramadan:userProfile.ramadan,theme:userProfile.theme,goal:userProfile.goal,fitness:userProfile.fitness,custom_tasks:customTasks,user_stats:userStats});
+  const payload={
+    user_id:currentUser.id,
+    ramadan: profile.ramadan,   // boolean stored directly
+    theme:   profile.theme,
+    goal:    profile.goal,
+    fitness: profile.fitness,
+    hidden_tasks:   profile.hiddenTasks||[],
+    task_overrides: profile.taskOverrides||{},
+    custom_tasks:   customTasks,
+    user_stats:     userStats,
+    food_logs:      foodLogs,
+    run_logs:       runLogs,
+  };
+  const {error}=await sb.from('profiles').upsert(payload,{onConflict:'user_id'});
+  if(error)console.error('saveProfile error:',error);
 }
-function setTheme(t){userProfile.theme=t;applyTheme(t);saveProfile();document.querySelectorAll('.theme-opt[data-t]').forEach(el=>el.classList.toggle('active',el.dataset.t===t));}
-function applyTheme(t){document.body.setAttribute('data-theme',t);document.querySelectorAll('.theme-opt[data-t]').forEach(el=>el.classList.toggle('active',el.dataset.t===t));}
-function setRamadan(val){userProfile.ramadan=val;saveProfile();document.getElementById('ramOnBtn').classList.toggle('active',val);document.getElementById('ramOffBtn').classList.toggle('active',!val);render();showToast('🌙','Ramadan Mode',val?'ON':'OFF');}
+
+function setTheme(t){
+  profile.theme=t;applyTheme(t);saveProfile();
+  document.querySelectorAll('.theme-opt[data-t]').forEach(el=>el.classList.toggle('active',el.dataset.t===t));
+}
+function applyTheme(t){
+  document.body.setAttribute('data-theme',t||'military');
+  document.querySelectorAll('.theme-opt[data-t]').forEach(el=>el.classList.toggle('active',el.dataset.t===t));
+}
+
+async function setRamadan(val){
+  profile.ramadan=val;
+  await saveProfile(); // await to make sure it persists before UI update
+  document.getElementById('ramOnBtn').classList.toggle('active',val);
+  document.getElementById('ramOffBtn').classList.toggle('active',!val);
+  render();
+  showToast('🌙','Ramadan Mode',val?'Turned ON':'Turned OFF');
+}
+
 function openSettings(){
-  document.getElementById('settingsPanel').classList.add('open');document.getElementById('settingsOverlay').classList.add('open');
+  document.getElementById('settingsPanel').classList.add('open');
+  document.getElementById('settingsOverlay').classList.add('open');
   document.getElementById('usernameDisplay').textContent=currentUser?.user_metadata?.username||currentUser?.email||'—';
-  document.querySelectorAll('.theme-opt[data-t]').forEach(el=>el.classList.toggle('active',el.dataset.t===userProfile.theme));
-  document.getElementById('ramOnBtn').classList.toggle('active',userProfile.ramadan);
-  document.getElementById('ramOffBtn').classList.toggle('active',!userProfile.ramadan);
+  applyTheme(profile.theme);
+  document.getElementById('ramOnBtn').classList.toggle('active',profile.ramadan===true);
+  document.getElementById('ramOffBtn').classList.toggle('active',profile.ramadan!==true);
 }
 function closeSettings(){document.getElementById('settingsPanel').classList.remove('open');document.getElementById('settingsOverlay').classList.remove('open');}
 
-/* ═══ DATA ═══ */
+/* ══ TASK DATA ══ */
 async function loadUserData(){
   const {data,error}=await sb.from('task_logs').select('*').eq('user_id',currentUser.id);
   if(error){console.error(error);return;}
@@ -835,26 +1006,104 @@ async function loadUserData(){
     if(t){dayCache[r.date].pts=(dayCache[r.date].pts||0)+t.pts;totalPoints+=t.pts;}
   });
 }
+
 async function toggleTask(taskId){
   const tasks=getActiveTasks();const task=tasks.find(t=>t.id===taskId);if(!task)return;
   if(!dayCache[currentDate])dayCache[currentDate]={tasks:{},pts:0};
   const was=!!dayCache[currentDate].tasks[taskId];
   if(was){
     await sb.from('task_logs').delete().eq('user_id',currentUser.id).eq('date',currentDate).eq('task_id',taskId);
-    dayCache[currentDate].tasks[taskId]=false;dayCache[currentDate].pts-=task.pts;totalPoints=Math.max(0,totalPoints-task.pts);
+    dayCache[currentDate].tasks[taskId]=false;
+    dayCache[currentDate].pts=Math.max(0,(dayCache[currentDate].pts||0)-task.pts);
+    totalPoints=Math.max(0,totalPoints-task.pts);
   }else{
     await sb.from('task_logs').insert({user_id:currentUser.id,date:currentDate,task_id:taskId});
-    dayCache[currentDate].tasks[taskId]=true;dayCache[currentDate].pts=(dayCache[currentDate].pts||0)+task.pts;totalPoints+=task.pts;
-    checkRankUp(task.pts);showToast('⭐',`+${task.pts} Points`,task.name);
+    dayCache[currentDate].tasks[taskId]=true;
+    dayCache[currentDate].pts=(dayCache[currentDate].pts||0)+task.pts;
+    totalPoints+=task.pts;
+    checkRankUp(task.pts);
+    showToast('⭐',`+${task.pts} Points`,task.name);
   }
   render();
 }
 
-/* ═══ STATS ═══ */
+/* ══ CUSTOM TASKS ══ */
+function openAddTask(sec){
+  editingTaskId=null;
+  document.getElementById('taskModalTitle').textContent='Add Task';
+  document.getElementById('taskNameInput').value='';
+  document.getElementById('taskTimeInput').value='';
+  document.getElementById('taskPtsInput').value='10';
+  document.getElementById('taskSectionInput').value=sec||'discipline';
+  document.getElementById('taskModal').classList.add('open');
+}
+
+function openEditTask(id){
+  const all=[...DEFAULT_TASKS,...customTasks];
+  const t=all.find(x=>x.id===id);if(!t)return;
+  editingTaskId=id;
+  document.getElementById('taskModalTitle').textContent='Edit Task';
+  document.getElementById('taskNameInput').value=t.name;
+  document.getElementById('taskTimeInput').value=t.time;
+  document.getElementById('taskPtsInput').value=t.pts;
+  document.getElementById('taskSectionInput').value=t.sec||t.section||'discipline';
+  document.getElementById('taskModal').classList.add('open');
+}
+
+function closeTaskModal(){document.getElementById('taskModal').classList.remove('open');editingTaskId=null;}
+
+async function saveTask(){
+  const name=document.getElementById('taskNameInput').value.trim();
+  const time=document.getElementById('taskTimeInput').value.trim()||'Any time';
+  const pts=Math.min(100,Math.max(1,parseInt(document.getElementById('taskPtsInput').value)||10));
+  const sec=document.getElementById('taskSectionInput').value;
+  if(!name){showToast('⚠️','Error','Please enter a task name.');return;}
+
+  if(editingTaskId){
+    const isDefault=DEFAULT_TASKS.some(t=>t.id===editingTaskId);
+    if(isDefault){
+      if(!profile.taskOverrides)profile.taskOverrides={};
+      profile.taskOverrides[editingTaskId]={name,time,pts,sec};
+    }else{
+      const i=customTasks.findIndex(t=>t.id===editingTaskId);
+      if(i>-1)customTasks[i]={...customTasks[i],name,time,pts,sec};
+    }
+  }else{
+    customTasks.push({id:'c_'+Date.now(),sec,name,time,pts});
+  }
+  await saveProfile();closeTaskModal();render();
+  showToast('✅',editingTaskId?'Task Updated':'Task Added',name);
+}
+
+async function deleteTask(id){
+  if(!confirm('Delete this task?'))return;
+  const isDefault=DEFAULT_TASKS.some(t=>t.id===id);
+  if(isDefault){
+    if(!profile.hiddenTasks)profile.hiddenTasks=[];
+    if(!profile.hiddenTasks.includes(id))profile.hiddenTasks.push(id);
+    // Also remove override if exists
+    if(profile.taskOverrides&&profile.taskOverrides[id])delete profile.taskOverrides[id];
+  }else{
+    customTasks=customTasks.filter(t=>t.id!==id);
+  }
+  await saveProfile();render();showToast('🗑️','Task Removed','');
+}
+
+/* 3-DOT MENU */
+function toggleDotMenu(event,taskId){
+  event.stopPropagation();
+  if(openDotMenu&&openDotMenu!==taskId)closeDotMenus();
+  const menu=document.getElementById('dm_'+taskId);
+  if(menu){menu.classList.toggle('open');openDotMenu=menu.classList.contains('open')?taskId:null;}
+}
+function closeDotMenus(){document.querySelectorAll('.dot-menu.open').forEach(m=>m.classList.remove('open'));openDotMenu=null;}
+document.addEventListener('click',closeDotMenus);
+
+/* ══ STATS ══ */
 function openStatModal(){
   document.getElementById('statInputRows').innerHTML=STAT_KEYS.map(s=>{
-    const entries=userStats[s.key]||[];const latest=entries.length?entries[entries.length-1].val:s.baseline||'';
-    return`<div class="stat-input-row"><div class="stat-input-label">${s.label}</div><input class="stat-input-field" id="si_${s.key}" type="number" value="${latest}" placeholder="${s.baseline||''}"></div>`;
+    const entries=userStats[s.key]||[];const latest=entries.length?entries[entries.length-1].val:(s.baseline||'');
+    return`<div class="stat-input-row"><div class="stat-input-label">${s.label}</div><input class="stat-input-field" id="si_${s.key}" type="number" value="${latest}" placeholder="${s.baseline||'—'}"></div>`;
   }).join('');
   document.getElementById('statModal').classList.add('open');
 }
@@ -869,72 +1118,184 @@ async function saveStats(){
     if(!last||last.date!==today)userStats[s.key].push({val,date:today});
     else userStats[s.key][userStats[s.key].length-1].val=val;
   });
-  await saveProfile();closeStatModal();
-  renderProgress();renderStats();
+  await saveProfile();closeStatModal();renderProgress();renderStats();
   showToast('📊','Stats Updated','Progress logged!');
 }
 
-/* ═══ CUSTOM TASKS ═══ */
-function openAddTask(section){editingTaskId=null;document.getElementById('taskModalTitle').textContent='Add Task';document.getElementById('taskNameInput').value='';document.getElementById('taskTimeInput').value='';document.getElementById('taskPtsInput').value='10';document.getElementById('taskSectionInput').value=section||'discipline';document.getElementById('taskModal').classList.add('open');}
-function openEditTask(id){
-  const allTasks=[...DEFAULT_TASKS,...customTasks];
-  const t=allTasks.find(x=>x.id===id);if(!t)return;
-  editingTaskId=id;
-  document.getElementById('taskModalTitle').textContent='Edit Task';
-  document.getElementById('taskNameInput').value=t.name;
-  document.getElementById('taskTimeInput').value=t.time;
-  document.getElementById('taskPtsInput').value=t.pts;
-  document.getElementById('taskSectionInput').value=t.section;
-  document.getElementById('taskModal').classList.add('open');
+/* ══ FOOD LOG ══ */
+function searchFood(q){
+  const res=document.getElementById('foodResults');
+  if(!q||q.length<2){res.classList.remove('open');return;}
+  const matches=FOOD_DB.filter(f=>f.name.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  if(!matches.length){res.classList.remove('open');return;}
+  res.innerHTML=matches.map((f,i)=>`
+    <div class="food-result-item" onclick="selectFoodItem(${FOOD_DB.indexOf(f)})">
+      <div class="fri-name">${f.name}</div>
+      <div class="fri-macros">P:${f.p}g · C:${f.c}g · F:${f.f}g &nbsp;(${f.unit})</div>
+    </div>`).join('');
+  res.classList.add('open');
 }
-function closeTaskModal(){document.getElementById('taskModal').classList.remove('open');editingTaskId=null;}
-async function saveTask(){
-  const name=document.getElementById('taskNameInput').value.trim();
-  const time=document.getElementById('taskTimeInput').value.trim()||'Any time';
-  const pts=Math.min(100,Math.max(1,parseInt(document.getElementById('taskPtsInput').value)||10));
-  const section=document.getElementById('taskSectionInput').value;
-  if(!name){showToast('⚠️','Error','Please enter a task name.');return;}
-  if(editingTaskId){
-    // Check if default task
-    const defIdx=DEFAULT_TASKS.findIndex(t=>t.id===editingTaskId);
-    if(defIdx>-1){
-      // Store override in customTasks
-      const existingOverride=customTasks.findIndex(t=>t.id===editingTaskId);
-      const overrideTask={...DEFAULT_TASKS[defIdx],name,time,pts,section,isOverride:true};
-      if(existingOverride>-1)customTasks[existingOverride]=overrideTask;
-      else customTasks.push(overrideTask);
-    }else{
-      const i=customTasks.findIndex(t=>t.id===editingTaskId);
-      if(i>-1)customTasks[i]={...customTasks[i],name,time,pts,section};
-    }
-  }else{
-    customTasks.push({id:'c_'+Date.now(),section,name,time,pts,custom:true});
-  }
-  await saveProfile();closeTaskModal();render();showToast('✅',editingTaskId?'Task Updated':'Task Added',name);
+function selectFoodItem(idx){
+  selectedFood=FOOD_DB[idx];
+  document.getElementById('foodSearch').value=selectedFood.name;
+  document.getElementById('selFoodName').textContent=selectedFood.name;
+  document.getElementById('selFoodMacros').textContent=`Protein: ${selectedFood.p}g · Carbs: ${selectedFood.c}g · Fat: ${selectedFood.f}g (${selectedFood.unit})`;
+  document.getElementById('selectedFoodInfo').style.display='block';
+  document.getElementById('foodResults').classList.remove('open');
 }
-async function deleteTask(id){
-  if(!confirm('Delete this task?'))return;
-  // If default task, add to hidden list
-  const isDefault=DEFAULT_TASKS.some(t=>t.id===id);
-  if(isDefault){
-    if(!userProfile.hiddenTasks)userProfile.hiddenTasks=[];
-    userProfile.hiddenTasks.push(id);
+function openFoodModal(){
+  selectedFood=null;
+  document.getElementById('foodSearch').value='';
+  document.getElementById('foodAmount').value='';
+  document.getElementById('selectedFoodInfo').style.display='none';
+  document.getElementById('foodResults').classList.remove('open');
+  document.getElementById('foodModal').classList.add('open');
+}
+function closeFoodModal(){document.getElementById('foodModal').classList.remove('open');}
+async function saveFood(){
+  const amount=document.getElementById('foodAmount').value.trim()||'1 serving';
+  const meal=document.getElementById('foodMeal').value;
+  if(!selectedFood&&!document.getElementById('foodSearch').value.trim()){
+    showToast('⚠️','Error','Please select a food item.');return;
   }
-  customTasks=customTasks.filter(t=>t.id!==id);
-  await saveProfile();render();showToast('🗑️','Task Removed','');
+  const name=selectedFood?selectedFood.name:document.getElementById('foodSearch').value.trim();
+  const p=selectedFood?selectedFood.p:0;
+  const c=selectedFood?selectedFood.c:0;
+  const f=selectedFood?selectedFood.f:0;
+  foodLogs.push({id:'fl_'+Date.now(),name,amount,meal,p,c,f,date:dateKey(new Date())});
+  await saveProfile();closeFoodModal();renderFoodPage();
+  showToast('🥗','Food Logged',name);
+}
+async function deleteFood(id){
+  foodLogs=foodLogs.filter(f=>f.id!==id);
+  await saveProfile();renderFoodPage();
+}
+function renderFoodPage(){
+  const today=dateKey(new Date());
+  const todayLogs=foodLogs.filter(f=>f.date===today);
+  const totalP=todayLogs.reduce((s,f)=>s+f.p,0);
+  const totalC=todayLogs.reduce((s,f)=>s+f.c,0);
+  const totalF=todayLogs.reduce((s,f)=>s+f.f,0);
+  const goalP=120,goalC=250,goalF=60;
+  document.getElementById('dailyMacroBar').innerHTML=`
+    <div class="daily-macro-title">Today's Macros</div>
+    <div class="macro-row">
+      <div class="macro-row-label">Protein</div>
+      <div class="macro-track"><div class="macro-fill p" style="width:${Math.min(100,totalP/goalP*100)}%"></div></div>
+      <div class="macro-row-val" style="color:var(--blue)">${Math.round(totalP)}g</div>
+    </div>
+    <div class="macro-row">
+      <div class="macro-row-label">Carbs</div>
+      <div class="macro-track"><div class="macro-fill c" style="width:${Math.min(100,totalC/goalC*100)}%"></div></div>
+      <div class="macro-row-val" style="color:var(--accent)">${Math.round(totalC)}g</div>
+    </div>
+    <div class="macro-row">
+      <div class="macro-row-label">Fat</div>
+      <div class="macro-track"><div class="macro-fill f" style="width:${Math.min(100,totalF/goalF*100)}%"></div></div>
+      <div class="macro-row-val" style="color:var(--red)">${Math.round(totalF)}g</div>
+    </div>
+    <div style="font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px">Est. calories: ${Math.round(totalP*4+totalC*4+totalF*9)} kcal · Goal: ~${goalP*4+goalC*4+goalF*9} kcal</div>`;
+
+  const fl=document.getElementById('foodLogList');
+  if(!todayLogs.length){fl.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No food logged today. Tap + Log Food.</div>';return;}
+  fl.innerHTML=todayLogs.map(f=>`
+    <div class="food-log-entry">
+      <div>
+        <div class="food-log-name">${f.name}</div>
+        <div class="food-log-amount">${f.amount} · ${f.meal}</div>
+        <div class="food-log-macros">
+          <span class="food-log-macro p">P: ${f.p}g</span>
+          <span class="food-log-macro c">C: ${f.c}g</span>
+          <span class="food-log-macro f">F: ${f.f}g</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <button class="food-log-del" onclick="deleteFood('${f.id}')">✕</button>
+      </div>
+    </div>`).join('');
+
+  const prev=document.getElementById('prevFoodLog');
+  const prevLogs=foodLogs.filter(f=>f.date!==today).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
+  if(!prevLogs.length){prev.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No previous entries</div>';return;}
+  // Group by date
+  const byDate={};prevLogs.forEach(f=>{if(!byDate[f.date])byDate[f.date]=[];byDate[f.date].push(f);});
+  prev.innerHTML=Object.entries(byDate).map(([date,logs])=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px">${date}</div>
+      ${logs.map(f=>`<div style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between"><span>${f.name} <span style="color:var(--muted)">${f.amount}</span></span><span style="font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted)">P:${f.p}g C:${f.c}g</span></div>`).join('')}
+    </div>`).join('');
 }
 
-/* 3-DOT MENU */
-function toggleDotMenu(event,taskId){
-  event.stopPropagation();
-  if(openDotMenu&&openDotMenu!==taskId){closeDotMenus();}
-  const menu=document.getElementById('dm_'+taskId);
-  if(menu){menu.classList.toggle('open');openDotMenu=menu.classList.contains('open')?taskId:null;}
+/* ══ RUN LOG ══ */
+function openRunModal(){
+  document.getElementById('runDist').value='';
+  document.getElementById('runTime').value='';
+  document.getElementById('runNotes').value='';
+  document.getElementById('runPreview').style.display='none';
+  document.getElementById('runModal').classList.add('open');
 }
-function closeDotMenus(){document.querySelectorAll('.dot-menu.open').forEach(m=>m.classList.remove('open'));openDotMenu=null;}
-document.addEventListener('click',closeDotMenus);
+function closeRunModal(){document.getElementById('runModal').classList.remove('open');}
+// Live pace preview
+document.addEventListener('DOMContentLoaded',()=>{
+  ['runDist','runTime'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',updateRunPreview);
+  });
+});
+function updateRunPreview(){
+  const dist=parseFloat(document.getElementById('runDist').value);
+  const time=parseFloat(document.getElementById('runTime').value);
+  const prev=document.getElementById('runPreview');
+  if(dist>0&&time>0){
+    const pace=time/dist;
+    const paceMin=Math.floor(pace);const paceSec=Math.round((pace-paceMin)*60);
+    const speed=(dist/(time/60)).toFixed(1);
+    prev.style.display='block';
+    prev.textContent=`Pace: ${paceMin}:${paceSec.toString().padStart(2,'0')} min/km · Speed: ${speed} km/h`;
+  }else{prev.style.display='none';}
+}
+async function saveRun(){
+  const dist=parseFloat(document.getElementById('runDist').value);
+  const time=parseFloat(document.getElementById('runTime').value);
+  const notes=document.getElementById('runNotes').value.trim();
+  if(!dist||!time){showToast('⚠️','Error','Please enter distance and time.');return;}
+  const pace=time/dist;
+  const paceMin=Math.floor(pace);const paceSec=Math.round((pace-paceMin)*60);
+  runLogs.push({id:'rl_'+Date.now(),dist,time,notes,pace,paceStr:`${paceMin}:${paceSec.toString().padStart(2,'0')}`,date:dateKey(new Date())});
+  await saveProfile();closeRunModal();renderRunPage();
+  showToast('🏃',`${dist}km logged!`,`Pace: ${paceMin}:${paceSec.toString().padStart(2,'0')} min/km`);
+}
+async function deleteRun(id){
+  runLogs=runLogs.filter(r=>r.id!==id);
+  await saveProfile();renderRunPage();
+}
+function renderRunPage(){
+  const sorted=[...runLogs].sort((a,b)=>b.date.localeCompare(a.date));
+  const totalDist=runLogs.reduce((s,r)=>s+r.dist,0);
+  const totalRuns=runLogs.length;
+  const bestPace=runLogs.length?Math.min(...runLogs.map(r=>r.pace)):null;
+  const bpMin=bestPace?Math.floor(bestPace):0;const bpSec=bestPace?Math.round((bestPace-bpMin)*60):0;
 
-/* ═══ RENDER ═══ */
+  document.getElementById('runStatsBar').innerHTML=`
+    <div class="stat-card"><div class="stat-val">${totalRuns}</div><div class="stat-label">Total Runs</div></div>
+    <div class="stat-card"><div class="stat-val">${totalDist.toFixed(1)}km</div><div class="stat-label">Total Distance</div></div>
+    <div class="stat-card"><div class="stat-val">${bestPace?`${bpMin}:${bpSec.toString().padStart(2,'0')}`:'—'}</div><div class="stat-label">Best Pace</div></div>`;
+
+  const list=document.getElementById('runLogList');
+  if(!sorted.length){list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No runs logged yet. Tap + Log Run.</div>';return;}
+  list.innerHTML=sorted.map(r=>`
+    <div class="run-entry">
+      <div class="run-date">${r.date}</div>
+      <div class="run-info">
+        <div class="run-dist">${r.dist} km</div>
+        <div class="run-time">${r.time} min · ${r.paceStr} min/km${r.notes?` · ${r.notes}`:''}</div>
+      </div>
+      <div class="run-pace">${(r.dist/(r.time/60)).toFixed(1)} km/h</div>
+      <button style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px" onclick="deleteRun('${r.id}')">✕</button>
+    </div>`).join('');
+}
+
+/* ══ RENDER ══ */
 function render(){renderDate();renderSections();renderStats();renderQuote();}
 
 function renderDate(){
@@ -943,53 +1304,53 @@ function renderDate(){
   document.getElementById('dateSub').textContent=d.toLocaleDateString('en-PK',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 }
 
-function getEffectiveTasks(){
-  // Merge overrides
-  const hidden=userProfile.hiddenTasks||[];
-  const overrides={};customTasks.filter(t=>t.isOverride).forEach(t=>overrides[t.id]=t);
-  const base=DEFAULT_TASKS.filter(t=>(userProfile.ramadan?true:!t.ramadanOnly)&&!hidden.includes(t.id)).map(t=>overrides[t.id]||t);
-  const extras=customTasks.filter(t=>!t.isOverride);
-  return[...base,...extras];
-}
-
 function renderSections(){
   const container=document.getElementById('sectionsContainer');
   const day=dayCache[currentDate]||{tasks:{},pts:0};
-  const tasks=getEffectiveTasks();
+  const tasks=getActiveTasks();
   const grouped={};
-  tasks.forEach(t=>{if(!grouped[t.section])grouped[t.section]=[];grouped[t.section].push(t);});
+  tasks.forEach(t=>{const s=t.sec||t.section;if(!grouped[s])grouped[s]=[];grouped[s].push(t);});
   container.innerHTML='';
   Object.entries(grouped).forEach(([k,st])=>{
-    const m=SECTIONS_META[k];
+    const m=SEC_META[k]||{label:k,icon:'📌',color:'#888'};
     const sp=st.reduce((s,t)=>s+(day.tasks[t.id]?t.pts:0),0);
     const tp=st.reduce((s,t)=>s+t.pts,0);
     const sec=document.createElement('div');sec.className='section open';
-    sec.innerHTML=`<div class="section-header" onclick="toggleSection(this)"><div class="section-title" style="color:${m.color}">${m.icon} ${m.label}</div><div class="section-meta"><span class="section-pts">${sp}/${tp} pts</span><span class="section-toggle">▼</span></div></div>
-    <div class="section-body">
-      ${st.map(t=>`<div class="task ${day.tasks[t.id]?'done':''}" id="task_${t.id}">
-        <div class="task-click" onclick="toggleTask('${t.id}')"><div class="checkbox">${day.tasks[t.id]?'✓':''}</div><div class="task-info"><div class="task-name">${t.name}</div><div class="task-time">🕐 ${t.time}</div></div><div class="task-pts">+${t.pts}</div></div>
-        <button class="three-dot-btn" onclick="toggleDotMenu(event,'${t.id}')">⋮</button>
-        <div class="dot-menu" id="dm_${t.id}">
-          <div class="dot-menu-item" onclick="closeDotMenus();openEditTask('${t.id}')">✏️ Edit</div>
-          <div class="dot-menu-item danger" onclick="closeDotMenus();deleteTask('${t.id}')">🗑️ Delete</div>
-        </div>
-      </div>`).join('')}
-      <div class="add-task-btn" onclick="openAddTask('${k}')">＋ Add task to this section</div>
-    </div>`;
+    sec.innerHTML=`
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-title" style="color:${m.color}">${m.icon} ${m.label}</div>
+        <div class="section-meta"><span class="section-pts">${sp}/${tp} pts</span><span class="section-toggle">▼</span></div>
+      </div>
+      <div class="section-body">
+        ${st.map(t=>`
+          <div class="task ${day.tasks[t.id]?'done':''}" id="task_${t.id}">
+            <div class="task-click" onclick="toggleTask('${t.id}')">
+              <div class="checkbox">${day.tasks[t.id]?'✓':''}</div>
+              <div class="task-info"><div class="task-name">${t.name}</div><div class="task-time">🕐 ${t.time}</div></div>
+              <div class="task-pts">+${t.pts}</div>
+            </div>
+            <button class="three-dot-btn" onclick="toggleDotMenu(event,'${t.id}')">⋮</button>
+            <div class="dot-menu" id="dm_${t.id}">
+              <div class="dot-menu-item" onclick="closeDotMenus();openEditTask('${t.id}')">✏️ Edit</div>
+              <div class="dot-menu-item danger" onclick="closeDotMenus();deleteTask('${t.id}')">🗑️ Delete</div>
+            </div>
+          </div>`).join('')}
+        <div class="add-task-btn" onclick="openAddTask('${k}')">＋ Add task</div>
+      </div>`;
     container.appendChild(sec);
   });
 }
 
 function renderStats(){
-  const tasks=getEffectiveTasks();const day=dayCache[currentDate]||{tasks:{},pts:0};
+  const tasks=getActiveTasks();const day=dayCache[currentDate]||{tasks:{},pts:0};
   const done=tasks.filter(t=>day.tasks[t.id]).length;const pct=tasks.length?Math.round(done/tasks.length*100):0;
-  document.getElementById('progressFill').style.width=pct+'%';document.getElementById('progressPct').textContent=pct+'%';
-  document.getElementById('completedVal').textContent=pct+'%';document.getElementById('todayPts').textContent=day.pts||0;
-  document.getElementById('totalPoints').textContent=totalPoints;document.getElementById('streakVal').textContent=calcStreak();
-  // Pull-up stat on dashboard
-  const puEntries=userStats.pullups||[];const latestPu=puEntries.length?puEntries[puEntries.length-1].val:3;
-  document.getElementById('pullupStat').textContent=latestPu;
-  // Sidebar user
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('completedVal').textContent=pct+'%';
+  document.getElementById('todayPts').textContent=day.pts||0;
+  document.getElementById('totalPoints').textContent=totalPoints;
+  document.getElementById('streakVal').textContent=calcStreak();
+  const puE=userStats.pullups||[];document.getElementById('pullupStat').textContent=puE.length?puE[puE.length-1].val:3;
   document.getElementById('sidebarUser').textContent=currentUser?.user_metadata?.username||currentUser?.email||'';
   const rank=getCurrentRank();const badge=document.getElementById('rankBadge');badge.textContent=rank.icon+' '+rank.name;
   const rc=getRankColor(rank.cost);badge.style.borderColor=rc;badge.style.color=rc;badge.style.background=rc+'18';
@@ -998,42 +1359,24 @@ function renderStats(){
 function renderProgress(){
   const grid=document.getElementById('statLogGrid');
   grid.innerHTML=STAT_KEYS.map(s=>{
-    const entries=userStats[s.key]||[];
-    const baseline=s.baseline;
-    const latest=entries.length?entries[entries.length-1].val:baseline;
-    const first=entries.length?entries[0].val:baseline;
+    const entries=userStats[s.key]||[];const latest=entries.length?entries[entries.length-1].val:s.baseline;
+    const first=entries.length?entries[0].val:s.baseline;
     const delta=first!=null&&latest!=null?+(latest-first).toFixed(1):null;
-    const isPositive=s.key==='run5k'?delta<=0:delta>=0;
+    const isPos=s.key==='run5k'?delta<=0:delta>=0;
     return`<div class="stat-log-card">
       <div class="stat-log-title">${s.label}</div>
-      <div class="stat-row-item">
-        <span class="stat-row-label">Baseline</span>
-        <span class="stat-baseline">${baseline!=null?baseline+' '+s.unit:'—'}</span>
-      </div>
-      <div class="stat-row-item">
-        <span class="stat-row-label">Current</span>
-        <div class="stat-row-vals">
-          <span class="stat-current">${latest!=null?latest+' '+s.unit:'Not logged'}</span>
-          ${delta!=null&&delta!==0?`<span class="stat-delta ${isPositive?'':'neg'}">${isPositive?'+':''}${delta}</span>`:''}
-        </div>
-      </div>
+      <div class="stat-row-item"><span class="stat-row-label">Baseline</span><span class="stat-baseline">${s.baseline!=null?s.baseline+' '+s.unit:'—'}</span></div>
+      <div class="stat-row-item"><span class="stat-row-label">Current</span><div class="stat-row-vals"><span class="stat-current">${latest!=null?latest+' '+s.unit:'Not logged'}</span>${delta!=null&&delta!==0?`<span class="stat-delta ${isPos?'':'neg'}">${isPos?'+':''}${delta}</span>`:''}</div></div>
       ${entries.length>1?`<div class="stat-row-item"><span class="stat-row-label">First logged</span><span class="stat-baseline">${entries[0].date}</span></div>`:''}
     </div>`;
   }).join('');
-
-  // Activity log
   const logEl=document.getElementById('activityLog');
   const allDays=Object.entries(dayCache).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
-  if(!allDays.length){logEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No activity yet. Start completing tasks!</div>';return;}
-  const tasks=getEffectiveTasks();
+  if(!allDays.length){logEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No activity yet.</div>';return;}
+  const tasks=getActiveTasks();
   logEl.innerHTML=allDays.map(([date,day])=>{
     const done=tasks.filter(t=>day.tasks[t.id]).length;const pct=tasks.length?Math.round(done/tasks.length*100):0;
-    const bar=pct>=70?'✅':'⬜';
-    return`<div class="log-entry">
-      <div class="log-date">${date}</div>
-      <div class="log-text">${bar} ${done}/${tasks.length} tasks — ${pct}% complete</div>
-      <div class="log-pts">+${day.pts||0} pts</div>
-    </div>`;
+    return`<div class="log-entry"><div class="log-date">${date}</div><div class="log-text">${pct>=70?'✅':'⬜'} ${done}/${tasks.length} tasks · ${pct}%</div><div class="log-pts">+${day.pts||0} pts</div></div>`;
   }).join('');
 }
 
@@ -1042,7 +1385,7 @@ function renderRewards(){document.getElementById('rewardsGrid').innerHTML=REWARD
 function renderStreak(){
   const today=dateKey(new Date());const days=[];
   for(let i=29;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(dateKey(d));}
-  const tasks=getEffectiveTasks();
+  const tasks=getActiveTasks();
   document.getElementById('streakCalendar').innerHTML=days.map(dk=>{
     const day=dayCache[dk];const done=day?tasks.filter(t=>day.tasks[t.id]).length:0;
     const pct=tasks.length?Math.round(done/tasks.length*100):0;const label=new Date(dk+'T12:00:00').getDate();
@@ -1056,7 +1399,7 @@ function getRankColor(c){if(c>=5000)return'#00d4ff';if(c>=3500)return'#ffd700';i
 function getCurrentRank(){let r=REWARDS[0];REWARDS.forEach(x=>{if(totalPoints>=x.cost)r=x;});return r;}
 function checkRankUp(added){REWARDS.forEach(r=>{if(r.cost>0&&totalPoints>=r.cost&&(totalPoints-added)<r.cost)setTimeout(()=>showToast(r.icon,'Rank Up!','You are now: '+r.name),800);});}
 function calcStreak(){
-  const tasks=getEffectiveTasks();let streak=0;const d=new Date();
+  const tasks=getActiveTasks();let streak=0;const d=new Date();
   while(true){const key=dateKey(d);const day=dayCache[key];if(!day)break;if(!tasks.length||tasks.filter(t=>day.tasks[t.id]).length/tasks.length<.7)break;streak++;d.setDate(d.getDate()-1);}
   return streak;
 }
@@ -1066,23 +1409,38 @@ function toggleSection(h){const s=h.closest('.section');s.classList.toggle('open
 let toastTimer;
 function showToast(icon,title,msg){const t=document.getElementById('toast');document.getElementById('toastIcon').textContent=icon;document.getElementById('toastTitle').textContent=title;document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);}
 
-/* ═══ INIT ═══ */
+/* ══ INIT ══ */
 async function init(){
   const {data:{session}}=await sb.auth.getSession();
   document.getElementById('loadingOverlay').style.display='none';
-  if(session){currentUser=session.user;await loadProfile();await loadUserData();document.getElementById('appScreen').style.display='block';render();}
-  else{document.getElementById('authScreen').style.display='flex';}
+  if(session){
+    currentUser=session.user;
+    await loadProfile();await loadUserData();
+    document.getElementById('appScreen').style.display='block';
+    render();
+  }else{
+    document.getElementById('authScreen').style.display='flex';
+  }
+
   sb.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session){
       currentUser=session.user;
-      document.getElementById('authScreen').style.display='none';document.getElementById('verifyScreen').style.display='none';
+      ['authScreen','verifyScreen'].forEach(id=>document.getElementById(id).style.display='none');
       document.getElementById('loadingOverlay').style.display='flex';
       await loadProfile();await loadUserData();
       document.getElementById('loadingOverlay').style.display='none';
       const{data}=await sb.from('profiles').select('user_id').eq('user_id',currentUser.id).single();
-      if(!data){obStep=0;buildObProg();document.querySelectorAll('.onboard-step').forEach((s,i)=>s.classList.toggle('active',i===0));document.getElementById('onboardScreen').style.display='flex';}
-      else{document.getElementById('appScreen').style.display='block';render();}
-    }else if(event==='SIGNED_OUT'){document.getElementById('appScreen').style.display='none';document.getElementById('authScreen').style.display='flex';}
+      if(!data){
+        obStep=0;buildObProg();
+        document.querySelectorAll('.onboard-step').forEach((s,i)=>s.classList.toggle('active',i===0));
+        document.getElementById('onboardScreen').style.display='flex';
+      }else{
+        document.getElementById('appScreen').style.display='block';render();
+      }
+    }else if(event==='SIGNED_OUT'){
+      document.getElementById('appScreen').style.display='none';
+      document.getElementById('authScreen').style.display='flex';
+    }
   });
 }
 init();
